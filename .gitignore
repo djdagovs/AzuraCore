@@ -1,3 +1,6 @@
+# Specific to this library
+.composer.lock
+
 # Environment-specific files.
 /example/app/config/db.conf.php
 /example/app/config/apis.conf.php
