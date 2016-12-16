@@ -16,9 +16,10 @@ tmp/cache/*---*
 .vagrant
 .idea
 ubuntu-*-console.log
+/html
 
 # Local development files.
-app/.env
+/example/app/.env
 
 # Composer-generated content
 /vendor/
