@@ -1,6 +1,8 @@
 {
   "name": "slvreagle23/azuracore",
   "description": "The common web application framework code powering AzuraCast and other similar MVC PHP web applications.",
+  "license": "Apache-2.0",
+
   "require": {
     "slim/slim": "^3.0",
     "league/plates": "^3.1",
