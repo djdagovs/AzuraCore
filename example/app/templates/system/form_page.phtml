@@ -1,0 +1,7 @@
+<?php $this->layout('main'); ?>
+
+<?php if ($render_mode == 'edit'): ?>
+    <?=$this->fetch('partials/form') ?>
+<?php else: ?>
+    <?=$this->fetch('partials/form_view') ?>
+<?php endif; ?>

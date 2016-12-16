@@ -1,0 +1,29 @@
+# Environment-specific files.
+/example/app/config/db.conf.php
+/example/app/config/apis.conf.php
+/example/app/config/influx.conf.php
+/example/app/config/cache.conf.php
+
+# Local development files.
+app/modules/frontend/controllers/UtilController.php
+
+# Junk/cache files.
+*Thumbs.db
+tmp/cache/*---*
+/example/app/models/Proxy/*.php
+*.DS_Store
+*.apdisk
+.vagrant
+.idea
+ubuntu-*-console.log
+
+# Local development files.
+app/.env
+
+# Composer-generated content
+/vendor/
+
+# Ansible deployment files
+/example/ansible/
+/example/util/ansible/deploy.retry
+/example/util/ansible/update.retry

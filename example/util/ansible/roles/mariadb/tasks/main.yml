@@ -1,0 +1,104 @@
+---
+ - name: Assign User Password
+   set_fact:
+     mysql_root_password: "password"
+
+ - name: Add repo file
+   template: src=mariadb_ubuntu.list.j2 dest=/etc/apt/sources.list.d/mariadb.list owner=root group=root mode=0644
+   register: mariadb_list
+   when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty'
+
+ - name: Add repo key
+   apt_key: id=1BB943DB url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xCBCB082A1BB943DB state=present
+   register: mariadb_key
+   when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty'
+
+ - name: Update apt cache
+   apt: update_cache=yes
+   when: mariadb_list.changed == True or mariadb_key.changed == True
+
+ - name: Unattended package installation
+   shell: export DEBIAN_FRONTEND=noninteractive
+   changed_when: false
+
+ - name: Install MariaDB
+   apt: pkg="{{ item }}" state=present
+   with_items:
+     - mariadb-server
+     - mariadb-client
+
+ - name: Add configuration
+   template: src=my.cnf.j2 dest=/etc/mysql/conf.d/my.cnf owner=root group=root mode=0644
+   notify: restart mysql
+
+ - name: Start and enable service
+   service: name=mysql state=started enabled=yes
+
+ - name: Add empty .my.cnf (if none exists)
+   become: true
+   template: src=root_empty_my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+
+ - name: MySQL Root Account Fix (Ubuntu 16.04)
+   become: true
+   shell: "cat {{ util_base }}/xenial_mysql_fix.sql | mysql --defaults-extra-file=/root/.my.cnf -NB"
+   when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'xenial'
+
+ # MySQL Secure Installation
+ - name: Set root Password
+   mysql_user:
+     name: root
+     host: "localhost"
+     password: "{{ mysql_root_password }}"
+     priv: "*.*:ALL,GRANT"
+     state: present
+   notify: send mysql notification
+
+ - name: Add .my.cnf
+   become: true
+   template: src=root_my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600 force=yes
+
+ - name: Remove anonymous users
+   command: 'mysql --defaults-extra-file=/root/.my.cnf -ne "{{ item }}"'
+   with_items:
+     - "DELETE FROM mysql.user WHERE User=''"
+   changed_when: False
+
+ - name: Disallow root login remotely
+   command: 'mysql --defaults-extra-file=/root/.my.cnf -ne "{{ item }}"'
+   with_items:
+     - "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+   changed_when: False
+
+ - name: Remove test database and access to it
+   command: 'mysql --defaults-extra-file=/root/.my.cnf -ne "{{ item }}"'
+   with_items:
+     - "DROP DATABASE test"
+     - "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'"
+   changed_when: False
+   ignore_errors: True
+
+ - name: Reload privilege tables
+   command: 'mysql --defaults-extra-file=/root/.my.cnf -ne "{{ item }}"'
+   with_items:
+     - "FLUSH PRIVILEGES"
+   changed_when: False
+
+ # Create Database
+ - name: Create MySQL Database
+   mysql_db:
+     config_file: "/root/.my.cnf"
+     name: app_test
+     state: present
+     collation: utf8mb4_unicode_ci
+     encoding: utf8mb4
+   register: db_created
+
+ - name: Install Initial Database
+   mysql_db: state=import name="app_test" target="{{ util_base }}/create_database.sql"
+   when: db_created.changed
+
+ - name: Copy default DB config again
+   copy: src="{{ www_base }}/app/config/db.conf.sample.php" dest="{{ www_base }}/app/config/db.conf.php" force=yes
+
+ - name: Set MySQL Password in Application
+   replace:  dest="{{ www_base }}/app/config/db.conf.php" regexp="'password'," replace="'{{ mysql_root_password }}',"

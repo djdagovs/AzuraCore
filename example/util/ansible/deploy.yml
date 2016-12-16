@@ -1,0 +1,18 @@
+---
+- hosts: all
+  become: true
+  vars:
+    util_base: "{{ playbook_dir | dirname }}"
+    www_base: "{{ util_base | dirname }}"
+    app_base: "{{ www_base | dirname }}"
+    tmp_base: "/tmp"
+    app_env: "development"
+    testing_mode: false
+
+  roles:
+    - init
+    - git
+    - nginx
+    - php
+    - mariadb
+    - composer

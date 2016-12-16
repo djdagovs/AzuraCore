@@ -1,0 +1,30 @@
+---
+  - debug:
+      msg: "Running Ansible on {{ inventory_hostname }} with OS {{ ansible_distribution }} {{ ansible_distribution_release }} {{ ansible_distribution_version }} {{ ansible_architecture }} ({{ app_env }})"
+
+  - debug:
+      msg: "Running in Testing Mode."
+    when: testing_mode|bool == true
+
+  - name: Update apt
+    become: true
+    apt:  update_cache=yes
+
+  - name: Install system packages
+    become: true
+    apt:  pkg="{{ item }}" state=latest
+    with_items:
+      - apt-transport-https
+      - curl
+      - wget
+      - tar
+      - build-essential
+      - python-software-properties
+      - pwgen
+      - whois
+      - python-pip
+
+  - name: Update pip components
+    pip: name="{{ item }}" state=latest
+    with_items:
+     - pip

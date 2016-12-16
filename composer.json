@@ -1,0 +1,41 @@
+{
+  "name": "slvreagle23/azuracore",
+  "description": "The common web application framework code powering AzuraCast and other similar MVC PHP web applications.",
+  "require": {
+    "slim/slim": "^3.0",
+    "league/plates": "^3.1",
+    "filp/whoops": "1.*",
+    "tedivm/stash": "0.14.*",
+    "nibble/nibble-forms": "dev-master",
+
+    "zendframework/zend-paginator": "^2.7",
+    "zendframework/zend-config": "^2.6",
+
+    "doctrine/orm": "~2.5",
+    "doctrine/migrations": "^1.4",
+    "jdorn/sql-formatter": "^1.2",
+
+    "nette/mail": "2.3.0",
+    "packaged/helpers": "^1.5"
+  },
+  "require-dev": {
+    "codeception/codeception": "^2.2",
+    "codeclimate/php-test-reporter": "^0.3.2",
+    "flow/jsonpath": "^0.3.4"
+  },
+  "authors": [
+    {
+      "name": "Buster Neece",
+      "email": "buster@busterneece.com"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "App":   "src/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "stable"
+}

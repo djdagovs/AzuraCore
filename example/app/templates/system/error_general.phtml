@@ -1,0 +1,10 @@
+<?php $this->layout('main', ['title' => _('Error')]); ?>
+
+<header>
+    <!-- <span class="avatar"><img src="images/avatar.jpg" alt="" /></span> -->
+    <h1>Error 500</h1>
+    <p>
+        <?=$exception->getMessage() ?><br>
+        <?=$exception->getFile() ?> : <?=$exception->getLine() ?>
+    </p>
+</header>

@@ -1,0 +1,20 @@
+<?php
+$options = $form->getOptions();
+?>
+
+<?php foreach($options['groups'] as $fieldset_id => $fieldset): ?>
+
+    <fieldset>
+    <?php if (!empty($fieldset['legend'])): ?>
+        <legend><?=$fieldset['legend'] ?></legend>
+        <?php if (!empty($fieldset['description'])): ?>
+            <p><?=$fieldset['description'] ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
+
+        <dl>
+            <?=$this->fetch('partials/form_view_fields') ?>
+        </dl>
+    </fieldset>
+
+<?php endforeach; ?>
