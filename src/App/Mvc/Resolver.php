@@ -32,7 +32,7 @@ class Resolver implements CallableResolverInterface
         {
             list($module, $controller, $action) = explode(':', $toResolve);
 
-            $class = '\\Modules\\'.ucfirst($module).'\\Controllers\\'.ucfirst($controller).'Controller';
+            $class = '\\Controller\\'.ucfirst($module).'\\'.ucfirst($controller).'Controller';
             if (!class_exists($class))
                 throw new RuntimeException(sprintf('Callable %s does not exist', $class));
 

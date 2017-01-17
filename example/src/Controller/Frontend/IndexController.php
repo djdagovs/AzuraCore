@@ -1,8 +1,5 @@
 <?php
-namespace Modules\Frontend\Controllers;
-
-use Entity\Station;
-use Entity\Settings;
+namespace Controller\Frontend;
 
 class IndexController extends BaseController
 {

@@ -27,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # Web Server
-  config.vm.network :forwarded_port, guest: 80, host: 8080
+  config.vm.network "private_network",  ip: "192.168.23.101"
 
   config.vm.synced_folder "..", "/var/www", create: true, user: "azuracast", group: "www-data"
   config.vm.synced_folder "..", "/vagrant"

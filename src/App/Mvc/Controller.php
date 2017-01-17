@@ -29,9 +29,6 @@ class Controller
     /** @var Acl */
     protected $acl;
 
-    /** @var Config */
-    protected $current_module_config;
-
     protected $module;
     protected $controller;
     protected $action;
@@ -39,8 +36,6 @@ class Controller
     public function __construct(ContainerInterface $di, $module, $controller, $action)
     {
         $this->di = $di;
-
-        $this->current_module_config = $di['current_module_config'] = $di['module_config'][$module];
 
         $this->module = $module;
         $this->controller = $controller;
@@ -51,7 +46,7 @@ class Controller
         $this->em = $di['em'];
         $this->acl = $di['acl'];
 
-        $common_views_dir = APP_INCLUDE_MODULES.'/'.$module.'/views/scripts';
+        $common_views_dir = APP_INCLUDE_BASE.'/templates/'.$module;
         if (is_dir($common_views_dir))
         {
             $this->view->setFolder('common', $common_views_dir);

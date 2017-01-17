@@ -37,6 +37,7 @@ $config = [
         'psr4' => [
             'Entity\\' => APP_INCLUDE_MODELS.'/Entity',
             'Migration\\' => APP_INCLUDE_MODELS.'/Migration',
+            'Controller\\' => APP_INCLUDE_LIB.'/Controller',
             '\\Proxy\\' => APP_INCLUDE_TEMP . '/proxies',
         ],
     ],

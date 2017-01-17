@@ -16,8 +16,6 @@ define("APP_INCLUDE_ROOT", realpath(APP_INCLUDE_BASE.'/..'));
 define("APP_INCLUDE_WEB", APP_INCLUDE_ROOT.'/web');
 define("APP_INCLUDE_STATIC", APP_INCLUDE_WEB.'/static');
 
-define("APP_INCLUDE_MODULES", APP_INCLUDE_BASE.'/modules');
-
 define("APP_INCLUDE_TEMP", '/tmp');
 define("APP_INCLUDE_CACHE", APP_INCLUDE_TEMP);
 
@@ -108,25 +106,8 @@ $di['notFoundHandler'] = function ($di) {
     };
 };
 
-// Loop through modules to find configuration files.
-$modules = array_diff(scandir(APP_INCLUDE_MODULES), ['..', '.']);
-$module_config = array();
-
-foreach($modules as $module)
-{
-    $full_path = APP_INCLUDE_MODULES.'/'.$module;
-
-    $config_directory = $full_path.'/config';
-    if (file_exists($config_directory))
-        $module_config[$module] = new \App\Config($config_directory, $di);
-
-    $module_class = 'Modules\\'.ucfirst($module).'\\Controllers\\';
-    $autoloader->addPsr4($module_class, $full_path.'/controllers');
-}
-
 // Configs
 $di['config'] = $config;
-$di['module_config'] = $module_config;
 
 // Database
 $di['em'] = function($di) {
@@ -259,7 +240,7 @@ $di['view'] = $di->factory(function($di) {
 $cache = $di->get('cache');
 
 // Set up application and routing.
-$di['app'] = function($di) use ($modules) {
+$di['app'] = function($di) {
 
     $app = new \Slim\App($di);
 
@@ -280,17 +261,9 @@ $di['app'] = function($di) use ($modules) {
         return $next($request, $response);
     });
 
-    // Loop through modules to configure routes.
-    foreach ($modules as $module)
-    {
-        $routes_file = APP_INCLUDE_MODULES . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'routes.php';
-
-        if (file_exists($routes_file))
-            include($routes_file);
-    }
+    include(APP_INCLUDE_BASE.'/config/routes.conf.php');
 
     return $app;
-
 };
 
 return $di;

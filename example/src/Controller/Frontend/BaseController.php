@@ -1,5 +1,5 @@
 <?php
-namespace Modules\Frontend\Controllers;
+namespace Controller\Frontend;
 
 class BaseController extends \App\Mvc\Controller
 {
