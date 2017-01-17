@@ -2,7 +2,7 @@
 namespace App;
 
 use Entity\User;
-use Entity\UserRepository;
+use Entity\Repository\UserRepository;
 
 class Auth
 {

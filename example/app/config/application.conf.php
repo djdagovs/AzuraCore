@@ -32,15 +32,11 @@ $config = [
         ],
     ],
 
-    'pluginpaths' => [
-        'DF\Application\Resource\\' => 'DF/Application/Resource',
-    ],
-
     'autoload' => [
-        'psr0' => [
-            'Entity' => APP_INCLUDE_MODELS,
-        ],
+        'psr0' => [],
         'psr4' => [
+            'Entity\\' => APP_INCLUDE_MODELS.'/Entity',
+            'Migration\\' => APP_INCLUDE_MODELS.'/Migration',
             '\\Proxy\\' => APP_INCLUDE_TEMP . '/proxies',
         ],
     ],

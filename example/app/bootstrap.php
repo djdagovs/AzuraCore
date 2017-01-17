@@ -16,13 +16,13 @@ define("APP_INCLUDE_ROOT", realpath(APP_INCLUDE_BASE.'/..'));
 define("APP_INCLUDE_WEB", APP_INCLUDE_ROOT.'/web');
 define("APP_INCLUDE_STATIC", APP_INCLUDE_WEB.'/static');
 
-define("APP_INCLUDE_MODELS", APP_INCLUDE_BASE.'/models');
 define("APP_INCLUDE_MODULES", APP_INCLUDE_BASE.'/modules');
 
 define("APP_INCLUDE_TEMP", '/tmp');
 define("APP_INCLUDE_CACHE", APP_INCLUDE_TEMP);
 
-define("APP_INCLUDE_LIB", APP_INCLUDE_BASE.'/library');
+define("APP_INCLUDE_LIB", APP_INCLUDE_ROOT.'/src');
+define("APP_INCLUDE_MODELS", APP_INCLUDE_LIB);
 
 /* TODO: Change this when using this example in a real app! */
 define("APP_INCLUDE_VENDOR", APP_INCLUDE_ROOT.'/../vendor');
@@ -44,7 +44,6 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']))
 
 // Composer autoload.
 $autoloader = require(APP_INCLUDE_VENDOR . '/autoload.php');
-$autoloader->add('App', APP_INCLUDE_LIB);
 
 // Set up DI container.
 $app_settings = [
