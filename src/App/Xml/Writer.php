@@ -50,7 +50,11 @@ class Writer extends \Zend\Config\Writer\Xml
 
         foreach ($config as $sectionName => $data) {
             if (!is_array($data)) {
-                $writer->writeElement($sectionName, (string)$data);
+                if (substr($sectionName, 0, 1) == '@') {
+                    $writer->writeAttribute(substr($sectionName, 1), (string)$data);
+                } else {
+                    $writer->writeElement($sectionName, (string)$data);
+                }
             } else {
                 $this->addBranch($sectionName, $data, $writer);
             }
