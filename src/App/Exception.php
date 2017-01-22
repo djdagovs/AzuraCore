@@ -1,3 +1,6 @@
 <?php
 namespace App;
-class Exception extends \Exception {}
+
+class Exception extends \Exception
+{
+}

@@ -10,16 +10,14 @@ use Codeception\Lib\Connector\Shared\PhpSuperGlobalsConverter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-
 use Slim\App;
+use Slim\Http\Cookies;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
-use Slim\Http\Cookies;
 use Slim\Http\RequestBody;
 use Slim\Http\Stream;
 use Slim\Http\UploadedFile;
 use Slim\Http\Uri;
-
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\BrowserKit\Request as BrowserKitRequest;
 use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
@@ -57,13 +55,10 @@ class Connector extends Client
         $uri = str_replace('http://localhost', '', $request->getUri());
 
         $_REQUEST = $this->remapRequestParameters($request->getParameters());
-        if (strtoupper($request->getMethod()) == 'GET')
-        {
+        if (strtoupper($request->getMethod()) == 'GET') {
             $_GET = $_REQUEST;
             $_POST = [];
-        }
-        else
-        {
+        } else {
             $_GET = [];
             $_POST = $_REQUEST;
         }
@@ -85,7 +80,7 @@ class Connector extends Client
         $slimResponse = $this->app->process($slimRequest, $slimResponse);
 
         return new BrowserKitResponse(
-            (string) $slimResponse->getBody(),
+            (string)$slimResponse->getBody(),
             $slimResponse->getStatusCode(),
             $slimResponse->getHeaders()
         );

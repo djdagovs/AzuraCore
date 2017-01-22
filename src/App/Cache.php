@@ -22,6 +22,32 @@ class Cache
     }
 
     /**
+     * @param string $cache_level
+     * @param string $cache_separator
+     * @return string Compiled site prefix for cache use.
+     */
+    public static function getSitePrefix($cache_level = 'user', $cache_separator = '')
+    {
+        static $cache_base;
+
+        if (!$cache_base) {
+            $dir_hash = md5(APP_INCLUDE_ROOT);
+            $cache_base = substr($dir_hash, 0, 3);
+        }
+
+        // Shortening of cache level names.
+        if ($cache_level == 'user') {
+            $cache_level = 'u';
+        } elseif ($cache_level == 'doctrine') {
+            $cache_level = 'db';
+        } elseif ($cache_level == 'session') {
+            $cache_level = 's';
+        }
+
+        return $cache_base . $cache_separator . $cache_level . $cache_separator;
+    }
+
+    /**
      * Return the raw cache itself for manipulation.
      *
      * @return \Stash\Pool
@@ -32,34 +58,35 @@ class Cache
     }
 
     /**
-     * Attempt to load an item from cache, or return default value if not found.
-     *
-     * @param $id
-     * @param null $default
-     * @return mixed|null
-     */
-    public function load($id, $default = NULL)
-    {
-        $item = $this->_cache->getItem($id);
-
-        if ($item->isHit())
-            return $item->get();
-        elseif (is_callable($default))
-            return $default();
-        else
-            return $default;
-    }
-
-    /**
      * Alias of the "load" function.
      *
      * @param $id
      * @param null $default
      * @return mixed|null
      */
-    public function get($id, $default = NULL)
+    public function get($id, $default = null)
     {
         return $this->load($id, $default);
+    }
+
+    /**
+     * Attempt to load an item from cache, or return default value if not found.
+     *
+     * @param $id
+     * @param null $default
+     * @return mixed|null
+     */
+    public function load($id, $default = null)
+    {
+        $item = $this->_cache->getItem($id);
+
+        if ($item->isHit()) {
+            return $item->get();
+        } elseif (is_callable($default)) {
+            return $default();
+        } else {
+            return $default;
+        }
     }
 
     /**
@@ -75,23 +102,6 @@ class Cache
     }
 
     /**
-     * Save an item to the cache.
-     *
-     * @param $data
-     * @param $id
-     * @param bool|false $specificLifetime
-     */
-    public function save($data, $id, $specificLifetime = false)
-    {
-        if ($specificLifetime === false)
-            $specificLifetime = $this->_cache_lifetime;
-
-        $item = $this->_cache->getItem($id);
-        $item->set($data);
-        $item->expiresAfter($specificLifetime);
-    }
-
-    /**
      * Alias for the "save" function.
      *
      * @param $data
@@ -104,6 +114,24 @@ class Cache
     }
 
     /**
+     * Save an item to the cache.
+     *
+     * @param $data
+     * @param $id
+     * @param bool|false $specificLifetime
+     */
+    public function save($data, $id, $specificLifetime = false)
+    {
+        if ($specificLifetime === false) {
+            $specificLifetime = $this->_cache_lifetime;
+        }
+
+        $item = $this->_cache->getItem($id);
+        $item->set($data);
+        $item->expiresAfter($specificLifetime);
+    }
+
+    /**
      * Combination of the "get" and "set" functions to return an existing cache
      * item or set it if one doesn't exist.
      *
@@ -112,24 +140,23 @@ class Cache
      * @param bool|false $specificLifetime
      * @return mixed|null
      */
-    public function getOrSet($id, $default = NULL, $specificLifetime = false)
+    public function getOrSet($id, $default = null, $specificLifetime = false)
     {
-        if ($specificLifetime === false)
+        if ($specificLifetime === false) {
             $specificLifetime = $this->_cache_lifetime;
+        }
 
         $item = $this->_cache->getItem($id);
 
-        if (!$item->isMiss())
-        {
+        if (!$item->isMiss()) {
             return $item->get();
-        }
-        else
-        {
+        } else {
             $item->lock();
 
             $result = (is_callable($default)) ? $default() : $default;
-            if ($result !== null)
+            if ($result !== null) {
                 $item->set($result, $specificLifetime);
+            }
 
             return $result;
         }
@@ -155,31 +182,5 @@ class Cache
     public function clean()
     {
         return $this->_cache->clear();
-    }
-
-    /**
-     * @param string $cache_level
-     * @param string $cache_separator
-     * @return string Compiled site prefix for cache use.
-     */
-    public static function getSitePrefix($cache_level = 'user', $cache_separator = '')
-    {
-        static $cache_base;
-
-        if (!$cache_base)
-        {
-            $dir_hash = md5(APP_INCLUDE_ROOT);
-            $cache_base = substr($dir_hash, 0, 3);
-        }
-
-        // Shortening of cache level names.
-        if ($cache_level == 'user')
-            $cache_level = 'u';
-        elseif ($cache_level == 'doctrine')
-            $cache_level = 'db';
-        elseif ($cache_level == 'session')
-            $cache_level = 's';
-
-        return $cache_base.$cache_separator.$cache_level.$cache_separator;
     }
 }

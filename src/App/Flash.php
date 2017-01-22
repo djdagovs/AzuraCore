@@ -12,7 +12,7 @@ class Flash
     const ERROR = 'error';
     const INFO = 'info';
 
-    protected $messages = array();
+    protected $messages = [];
 
     /**
      * @var Session\Instance
@@ -37,29 +37,28 @@ class Flash
      */
     public function addMessage($message, $level = self::INFO, $save_in_session = true)
     {
-        $color_chart = array(
-            'green'     => 'success',
-            'success'   => 'success',
-            'yellow'    => 'warning',
-            'warning'   => 'warning',
-            'red'       => 'danger',
-            'error'     => 'danger',
-            'info'      => 'info',
-            'blue'      => 'info',
-            'default'   => '',
-        );
+        $color_chart = [
+            'green' => 'success',
+            'success' => 'success',
+            'yellow' => 'warning',
+            'warning' => 'warning',
+            'red' => 'danger',
+            'error' => 'danger',
+            'info' => 'info',
+            'blue' => 'info',
+            'default' => '',
+        ];
 
-        $message_row = array(
-            'text'  => $message,
+        $message_row = [
+            'text' => $message,
             'color' => (isset($color_chart[$level])) ? $color_chart[$level] : $color_chart['default'],
-        );
+        ];
 
         $message_hash = md5(json_encode($message_row));
 
         $this->messages[$message_hash] = $message_row;
 
-        if ($save_in_session)
-        {
+        if ($save_in_session) {
             $messages = $this->_session->messages;
             $messages[$message_hash] = $message_row;
             $this->_session->messages = $messages;
@@ -85,7 +84,7 @@ class Flash
     {
         $messages = $this->messages;
 
-        $this->messages = array();
+        $this->messages = [];
         unset($this->_session->messages);
 
         return (count($messages) > 0) ? $messages : false;

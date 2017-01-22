@@ -6,9 +6,9 @@
 namespace App\Xml;
 
 use Traversable;
+use XMLWriter;
 use Zend\Config\Exception;
 use Zend\Stdlib\ArrayUtils;
-use XMLWriter;
 
 class Writer extends \Zend\Config\Writer\Xml
 {
@@ -50,7 +50,7 @@ class Writer extends \Zend\Config\Writer\Xml
 
         foreach ($config as $sectionName => $data) {
             if (!is_array($data)) {
-                $writer->writeElement($sectionName, (string) $data);
+                $writer->writeElement($sectionName, (string)$data);
             } else {
                 $this->addBranch($sectionName, $data, $writer);
             }
@@ -65,8 +65,8 @@ class Writer extends \Zend\Config\Writer\Xml
     /**
      * Add a branch to an XML object recursively.
      *
-     * @param  string    $branchName
-     * @param  array     $config
+     * @param  string $branchName
+     * @param  array $config
      * @param  XMLWriter $writer
      * @return void
      * @throws Exception\RuntimeException
@@ -91,16 +91,17 @@ class Writer extends \Zend\Config\Writer\Xml
                 if (is_array($value)) {
                     $this->addBranch($branchName, $value, $writer);
                 } else {
-                    $writer->writeElement($branchName, (string) $value);
+                    $writer->writeElement($branchName, (string)$value);
                 }
             } else {
                 if (is_array($value)) {
                     $this->addBranch($key, $value, $writer);
                 } else {
-                    if (substr($key, 0, 1) == '@')
+                    if (substr($key, 0, 1) == '@') {
                         $writer->writeAttribute(substr($key, 1), (string)$value);
-                    else
-                        $writer->writeElement($key, (string) $value);
+                    } else {
+                        $writer->writeElement($key, (string)$value);
+                    }
                 }
             }
         }
