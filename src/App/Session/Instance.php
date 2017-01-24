@@ -24,14 +24,11 @@ class Instance implements \ArrayAccess
         $this->_namespace = $namespace;
 
         // Lazy load session.
-        if ($this->_session->exists())
-        {
+        if ($this->_session->exists()) {
             $this->_session->start();
             $this->_data = $_SESSION[$this->_namespace];
-        }
-        else
-        {
-            $this->_data = array();
+        } else {
+            $this->_data = [];
         }
     }
 
@@ -48,8 +45,9 @@ class Instance implements \ArrayAccess
         if ($this->_session->isActive()) {
             $this->_session->start();
 
-            if (!isset($_SESSION[$this->_namespace]))
-                $_SESSION[$this->_namespace] = array();
+            if (!isset($_SESSION[$this->_namespace])) {
+                $_SESSION[$this->_namespace] = [];
+            }
 
             $_SESSION[$this->_namespace][$name] = $value;
         }
@@ -68,8 +66,9 @@ class Instance implements \ArrayAccess
         if ($this->_session->isActive()) {
             $this->_session->start();
 
-            if (!isset($_SESSION[$this->_namespace]))
-                $_SESSION[$this->_namespace] = array();
+            if (!isset($_SESSION[$this->_namespace])) {
+                $_SESSION[$this->_namespace] = [];
+            }
 
             $_SESSION[$this->_namespace][$name] = $value;
         }
@@ -83,8 +82,9 @@ class Instance implements \ArrayAccess
      */
     public function __get($name)
     {
-        if (isset($this->_data[$name]))
+        if (isset($this->_data[$name])) {
             return $this->_data[$name];
+        }
 
         return null;
     }
@@ -97,8 +97,9 @@ class Instance implements \ArrayAccess
      */
     public function offsetGet($name)
     {
-        if (isset($this->_data[$name]))
+        if (isset($this->_data[$name])) {
             return $this->_data[$name];
+        }
 
         return null;
     }

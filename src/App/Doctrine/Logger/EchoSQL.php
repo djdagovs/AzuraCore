@@ -9,26 +9,28 @@ class EchoSQL extends \Doctrine\DBAL\Logging\EchoSQLLogger
     {
         static $is_started;
 
-        if (!$is_started)
-        {
+        if (!$is_started) {
             Debug::setEchoMode();
             $is_started = true;
         }
 
         Debug::log($sql);
 
-        if ($params)
+        if ($params) {
             Debug::print_r($params);
+        }
 
-        if ($types)
+        if ($types) {
             Debug::print_r($types);
-        
-        $memory = memory_get_usage();
-        $mb = round($memory / (1024 * 1024), 4).'M';
+        }
 
-        Debug::log('Memory: '.$mb.'/'.ini_get('memory_limit'));
+        $memory = memory_get_usage();
+        $mb = round($memory / (1024 * 1024), 4) . 'M';
+
+        Debug::log('Memory: ' . $mb . '/' . ini_get('memory_limit'));
     }
-    
+
     public function stopQuery()
-    {}
+    {
+    }
 }

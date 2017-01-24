@@ -13,26 +13,28 @@ class View extends \League\Plates\Engine
     {
         $this->loadExtension(new View\Paginator($di['url']));
 
-        $this->registerFunction('mailto', function ($address, $link_text = NULL) {
-            $address = substr(chunk_split(bin2hex(" $address"), 2, ";&#x"), 3,-3);
+        $this->registerFunction('mailto', function ($address, $link_text = null) {
+            $address = substr(chunk_split(bin2hex(" $address"), 2, ";&#x"), 3, -3);
             $link_text = (is_null($link_text)) ? $address : $link_text;
 
-            return '<a href="mailto:'.$address.'">'.$link_text.'</a>';
+            return '<a href="mailto:' . $address . '">' . $link_text . '</a>';
         });
 
-        $this->registerFunction('pluralize', function($word, $num = 0) {
-            if ((int)$num == 1)
+        $this->registerFunction('pluralize', function ($word, $num = 0) {
+            if ((int)$num == 1) {
                 return $word;
-            else
+            } else {
                 return \Doctrine\Common\Inflector\Inflector::pluralize($word);
+            }
         });
 
-        $this->registerFunction('truncate', function($text, $length=80) {
+        $this->registerFunction('truncate', function ($text, $length = 80) {
             return \App\Utilities::truncate_text($text, $length);
         });
     }
 
     protected $rendered = false;
+
     protected $disabled = false;
 
     public function reset()
@@ -67,27 +69,30 @@ class View extends \League\Plates\Engine
         return $this->getData($key);
     }
 
-    public function render($name, array $data = array())
+    public function render($name, array $data = [])
     {
-        if (!$this->isDisabled())
-        {
+        if (!$this->isDisabled()) {
             $this->rendered = true;
+
             return parent::render($name, $data);
         }
+
         return null;
     }
 
-    public function fetch($name, array $data = array())
+    public function fetch($name, array $data = [])
     {
         return parent::render($name, $data);
     }
 
     public function setFolder($name, $directory, $fallback = false)
     {
-        if ($this->folders->exists($name))
+        if ($this->folders->exists($name)) {
             $this->folders->remove($name);
+        }
 
         $this->folders->add($name, $directory, $fallback);
+
         return $this;
     }
 }

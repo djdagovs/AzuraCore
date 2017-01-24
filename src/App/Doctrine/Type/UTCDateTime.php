@@ -1,9 +1,9 @@
 <?php
 namespace App\Doctrine\Type;
 
-use \Doctrine\DBAL\Types\DateTimeType;
-use \Doctrine\DBAL\Platforms\AbstractPlatform;
-use \Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\DateTimeType;
 
 class UTCDateTime extends DateTimeType
 {
@@ -36,6 +36,7 @@ class UTCDateTime extends DateTimeType
         if (!$val) {
             throw ConversionException::conversionFailed($value, $this->getName());
         }
+
         return $val;
     }
 }

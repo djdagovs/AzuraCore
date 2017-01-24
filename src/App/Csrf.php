@@ -41,24 +41,26 @@ class Csrf
      */
     public function generate($namespace = null)
     {
-        if ($namespace === null)
+        if ($namespace === null) {
             $namespace = $this->_csrf_default_namespace;
-
-        $key = NULL;
-        if (isset($this->_session[$namespace]))
-        {
-            $key = $this->_session[$namespace]['key'];
-            if (strlen($key) !== $this->_csrf_code_length)
-                $key = NULL;
         }
 
-        if (!$key)
-            $key = $this->randomString($this->_csrf_code_length);
+        $key = null;
+        if (isset($this->_session[$namespace])) {
+            $key = $this->_session[$namespace]['key'];
+            if (strlen($key) !== $this->_csrf_code_length) {
+                $key = null;
+            }
+        }
 
-        $this->_session[$namespace] = array(
-            'key'       => $key,
+        if (!$key) {
+            $key = $this->randomString($this->_csrf_code_length);
+        }
+
+        $this->_session[$namespace] = [
+            'key' => $key,
             'timestamp' => time(),
-        );
+        ];
 
         return $key;
     }
@@ -72,30 +74,36 @@ class Csrf
      */
     public function verify($key, $namespace = null)
     {
-        if ($namespace === null)
+        if ($namespace === null) {
             $namespace = $this->_csrf_default_namespace;
+        }
 
-        if (empty($key))
-            return array('is_valid' => false, 'message' => 'A CSRF token is required for this request.');
+        if (empty($key)) {
+            return ['is_valid' => false, 'message' => 'A CSRF token is required for this request.'];
+        }
 
-        if (strlen($key) !== $this->_csrf_code_length)
-            return array('is_valid' => false, 'message' => 'Malformed CSRF token supplied.');
+        if (strlen($key) !== $this->_csrf_code_length) {
+            return ['is_valid' => false, 'message' => 'Malformed CSRF token supplied.'];
+        }
 
-        if (!isset($this->_session[$namespace]))
-            return array('is_valid' => false, 'message' => 'No CSRF token supplied for this namespace.');
+        if (!isset($this->_session[$namespace])) {
+            return ['is_valid' => false, 'message' => 'No CSRF token supplied for this namespace.'];
+        }
 
         $namespace_info = $this->_session[$namespace];
 
-        if (strcmp($key, $namespace_info['key']) !== 0)
-            return array('is_valid' => false, 'message' => 'Invalid CSRF token supplied.');
+        if (strcmp($key, $namespace_info['key']) !== 0) {
+            return ['is_valid' => false, 'message' => 'Invalid CSRF token supplied.'];
+        }
 
         // Compare against time threshold (CSRF keys last 60 minutes).
-        $threshold =  $namespace_info['timestamp']+$this->_csrf_lifetime;
+        $threshold = $namespace_info['timestamp'] + $this->_csrf_lifetime;
 
-        if (time() >= $threshold)
-            return array('is_valid' => false, 'message' => 'This CSRF token has expired!');
+        if (time() >= $threshold) {
+            return ['is_valid' => false, 'message' => 'This CSRF token has expired!'];
+        }
 
-        return array('is_valid' => true);
+        return ['is_valid' => true];
     }
 
     /**
@@ -110,10 +118,11 @@ class Csrf
     {
         $verify_result = $this->verify($key, $namespace);
 
-        if ($verify_result['is_valid'])
+        if ($verify_result['is_valid']) {
             return true;
-        else
-            throw new Exception('Cannot validate CSRF token: '.$verify_result['message']);
+        } else {
+            throw new Exception('Cannot validate CSRF token: ' . $verify_result['message']);
+        }
     }
 
     /**
@@ -125,11 +134,12 @@ class Csrf
     public function randomString($length)
     {
         $seed = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijqlmnopqrtsuvwxyz0123456789';
-        $max = strlen( $seed ) - 1;
+        $max = strlen($seed) - 1;
 
         $string = '';
-        for ( $i = 0; $i < $length; ++$i )
-            $string .= $seed{intval( mt_rand( 0.0, $max ) )};
+        for ($i = 0; $i < $length; ++$i) {
+            $string .= $seed{intval(mt_rand(0.0, $max))};
+        }
 
         return $string;
     }

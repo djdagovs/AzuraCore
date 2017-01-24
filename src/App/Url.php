@@ -31,10 +31,11 @@ class Url
      */
     public function current($absolute = false)
     {
-        if (!empty($_SERVER['REQUEST_URI']))
+        if (!empty($_SERVER['REQUEST_URI'])) {
             return $this->getUrl($_SERVER['REQUEST_URI'], $absolute);
-        else
+        } else {
             return '';
+        }
     }
 
     /**
@@ -42,7 +43,7 @@ class Url
      */
     public function callback()
     {
-        return $this->getUrl($this->routeFromHere(array()), true);
+        return $this->getUrl($this->routeFromHere([]), true);
     }
 
     /**
@@ -53,8 +54,9 @@ class Url
      */
     public function referrer($default_url = null)
     {
-        if (isset($_SERVER['HTTP_REFERER']))
+        if (isset($_SERVER['HTTP_REFERER'])) {
             return $this->getUrl($_SERVER['HTTP_REFERER']);
+        }
 
         return null;
     }
@@ -69,10 +71,11 @@ class Url
         $router = $this->di['router'];
         $uri = $router->pathFor('home');
 
-        if ($include_host)
+        if ($include_host) {
             return $this->addSchemePrefix($uri);
-        else
+        } else {
             return $this->getUrl($uri);
+        }
     }
 
     /**
@@ -81,9 +84,9 @@ class Url
      * @param null $file_name
      * @return string The routed URL.
      */
-    public function content($file_name = NULL)
+    public function content($file_name = null)
     {
-        return $this->config->application->static_uri.$file_name;
+        return $this->config->application->static_uri . $file_name;
     }
 
     /**
@@ -92,61 +95,60 @@ class Url
      * @param $path_info
      * @return string The routed URL.
      */
-    public function route($path_info = array(), $absolute = null)
+    public function route($path_info = [], $absolute = null)
     {
         $router = $this->di['router'];
 
         $default_module = 'frontend';
-        $components = array(
-            'module'    => $default_module,
+        $components = [
+            'module' => $default_module,
             'controller' => 'index',
-            'action'    => 'index',
-        );
+            'action' => 'index',
+        ];
 
-        if (isset($path_info['module']))
-        {
+        if (isset($path_info['module'])) {
             $components['module'] = $path_info['module'];
             unset($path_info['module']);
         }
-        if (isset($path_info['controller']))
-        {
+        if (isset($path_info['controller'])) {
             $components['controller'] = $path_info['controller'];
             unset($path_info['controller']);
         }
-        if (isset($path_info['action']))
-        {
+        if (isset($path_info['action'])) {
             $components['action'] = $path_info['action'];
             unset($path_info['action']);
         }
-        if (isset($path_info['params']))
-        {
+        if (isset($path_info['params'])) {
             $path_info = array_merge($path_info, $path_info['params']);
             unset($path_info['params']);
         }
 
         // Handle the legacy "default" module being so-named.
-        if ($components['module'] == 'default')
+        if ($components['module'] == 'default') {
             $components['module'] = $default_module;
+        }
 
         // Special exception for homepage.
         if ($components['module'] == $default_module &&
             $components['controller'] == 'index' &&
             $components['action'] == 'index' &&
-            empty($path_info))
-        {
+            empty($path_info)
+        ) {
             return $router->pathFor('home');
         }
 
         // Otherwise compile URL using a uniform format.
-        $url_parts = array();
+        $url_parts = [];
 
-        if ($components['module'] != $default_module)
+        if ($components['module'] != $default_module) {
             $url_parts[] = $components['module'];
+        }
 
         $url_parts[] = $components['controller'];
         $url_parts[] = $components['action'];
 
         $router_path = implode(':', $url_parts);
+
         return $this->getUrl($router->pathFor($router_path, $path_info), $absolute);
     }
 
@@ -167,40 +169,32 @@ class Url
     {
         $new_path = (array)$this->current_route;
 
-        if (isset($path_info['module']))
-        {
+        if (isset($path_info['module'])) {
             $new_path['module'] = $path_info['module'];
             unset($path_info['module']);
         }
-        if (isset($path_info['controller']))
-        {
+        if (isset($path_info['controller'])) {
             $new_path['controller'] = $path_info['controller'];
             unset($path_info['controller']);
         }
-        if (isset($path_info['action']))
-        {
+        if (isset($path_info['action'])) {
             $new_path['action'] = $path_info['action'];
             unset($path_info['action']);
         }
 
-        if (count($path_info) > 0)
-        {
-            foreach ((array)$path_info as $param_key => $param_value)
-            {
+        if (count($path_info) > 0) {
+            foreach ((array)$path_info as $param_key => $param_value) {
                 $new_path['params'][$param_key] = $param_value;
             }
         }
 
-        if (isset($new_path['params']['name']))
-        {
+        if (isset($new_path['params']['name'])) {
             // Allow support for named routes.
             $route_name = $new_path['params']['name'];
             unset($new_path['params']['name']);
 
             return $this->named($route_name, $new_path['params']);
-        }
-        else
-        {
+        } else {
             return $this->route($new_path);
         }
     }
@@ -223,25 +217,27 @@ class Url
     public function getUrl($url_raw, $absolute = false)
     {
         // Ignore preformed URLs.
-        if (stristr($url_raw, '://'))
+        if (stristr($url_raw, '://')) {
             return $url_raw;
+        }
 
         // Retrieve domain from either MVC controller or config file.
         if ($this->include_domain || $absolute) {
 
             $url_domain = $this->di['em']->getRepository('Entity\Settings')->getSetting('base_url', '');
 
-            if (empty($url_domain))
+            if (empty($url_domain)) {
                 $url_domain = $this->config->application->base_url;
-            else
+            } else {
                 $url_domain = ((APP_IS_SECURE) ? 'https://' : 'http://') . $url_domain;
+            }
 
-            if (empty($url_domain))
-            {
+            if (empty($url_domain)) {
                 $http_host = trim($_SERVER['HTTP_HOST'], ':');
 
-                if (!empty($http_host))
+                if (!empty($http_host)) {
                     $url_domain = ((APP_IS_SECURE) ? 'https://' : 'http://') . $http_host;
+                }
             }
 
             $url_raw = $url_domain . $url_raw;
@@ -257,19 +253,20 @@ class Url
      * @param array $route_params
      * @return string
      */
-    public function named($route_name, $route_params = array())
+    public function named($route_name, $route_params = [])
     {
         $router = $this->di['router'];
+
         return $router->pathFor($route_name, $route_params);
     }
-    
+
     /**
      * Return URL for user-uploaded content.
      *
      * @param null $path
      * @return string
      */
-    public function upload($path = NULL)
+    public function upload($path = null)
     {
         return $this->content($path);
     }

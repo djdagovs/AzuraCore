@@ -2,15 +2,11 @@
 namespace App\Mvc;
 
 use App\Acl;
-use App\Config;
 use App\Url;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-
-use Entity\Settings;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Controller
 {
@@ -30,7 +26,9 @@ class Controller
     protected $acl;
 
     protected $module;
+
     protected $controller;
+
     protected $action;
 
     public function __construct(ContainerInterface $di, $module, $controller, $action)
@@ -46,14 +44,14 @@ class Controller
         $this->em = $di['em'];
         $this->acl = $di['acl'];
 
-        $common_views_dir = APP_INCLUDE_BASE.'/templates/'.$module;
-        if (is_dir($common_views_dir))
-        {
+        $common_views_dir = APP_INCLUDE_BASE . '/templates/' . $module;
+        if (is_dir($common_views_dir)) {
             $this->view->setFolder('common', $common_views_dir);
 
-            $controller_views_dir = $common_views_dir.'/'.$controller;
-            if (is_dir($controller_views_dir))
+            $controller_views_dir = $common_views_dir . '/' . $controller;
+            if (is_dir($controller_views_dir)) {
                 $this->view->setFolder('controller', $controller_views_dir);
+            }
         }
     }
 
@@ -81,48 +79,53 @@ class Controller
         $this->params = $args;
 
         $this->url->setCurrentRoute([
-            'module'        => $this->module,
-            'controller'    => $this->controller,
-            'action'        => $this->action,
-            'params'        => $args,
+            'module' => $this->module,
+            'controller' => $this->controller,
+            'action' => $this->action,
+            'params' => $args,
         ]);
 
         $init_result = $this->init();
-        if ($init_result instanceof Response)
+        if ($init_result instanceof Response) {
             return $init_result;
+        }
 
         $predispatch_result = $this->preDispatch();
-        if ($predispatch_result instanceof Response)
+        if ($predispatch_result instanceof Response) {
             return $predispatch_result;
+        }
 
-        $action_name = $this->action.'Action';
+        $action_name = $this->action . 'Action';
         $action_result = $this->$action_name();
-        if ($action_result instanceof Response)
+        if ($action_result instanceof Response) {
             return $action_result;
+        }
 
-        if (!$this->view->isDisabled())
+        if (!$this->view->isDisabled()) {
             return $this->render();
+        }
 
         return $this->response;
     }
 
     public function __get($key)
     {
-        if ($this->di->has($key))
+        if ($this->di->has($key)) {
             return $this->di->get($key);
-        else
+        } else {
             return null;
+        }
     }
 
     public function init()
     {
         $isAllowed = $this->permissions();
-        if (!$isAllowed)
-        {
-            if (!$this->auth->isLoggedIn())
+        if (!$isAllowed) {
+            if (!$this->auth->isLoggedIn()) {
                 throw new \App\Exception\NotLoggedIn;
-            else
+            } else {
                 throw new \App\Exception\PermissionDenied;
+            }
         }
 
         return null;
@@ -145,6 +148,7 @@ class Controller
     /* HTTP Cache Handling */
 
     protected $_cache_privacy = null;
+
     protected $_cache_lifetime = 0;
 
     /**
@@ -173,29 +177,22 @@ class Controller
     protected function handleCache()
     {
         // Set default caching parameters for pages that do not customize it.
-        if ($this->_cache_privacy === null)
-        {
+        if ($this->_cache_privacy === null) {
             $auth = $this->di->get('auth');
 
-            if ($auth->isLoggedIn())
-            {
+            if ($auth->isLoggedIn()) {
                 $this->_cache_privacy = 'private';
                 $this->_cache_lifetime = 0;
-            }
-            else
-            {
+            } else {
                 $this->_cache_privacy = 'public';
                 $this->_cache_lifetime = 30;
             }
         }
 
-        if ($this->_cache_privacy == 'private')
-        {
+        if ($this->_cache_privacy == 'private') {
             // $this->response->setHeader('Cache-Control', 'must-revalidate, private, max-age=' . $this->_cache_lifetime);
             $this->response = $this->response->withHeader('X-Accel-Expires', 'off');
-        }
-        else
-        {
+        } else {
             // $this->response->setHeader('Cache-Control', 'public, max-age=' . $this->_cache_lifetime);
             $this->response = $this->response->withHeader('X-Accel-Expires', $this->_cache_lifetime);
         }
@@ -210,16 +207,17 @@ class Controller
      * @param null $default_value
      * @return mixed|null
      */
-    public function getParam($param_name, $default_value = NULL)
+    public function getParam($param_name, $default_value = null)
     {
         $query_params = $this->request->getQueryParams();
 
-        if (isset($this->params[$param_name]))
+        if (isset($this->params[$param_name])) {
             return $this->params[$param_name];
-        elseif (isset($query_params[$param_name]))
+        } elseif (isset($query_params[$param_name])) {
             return $query_params[$param_name];
-        else
+        } else {
             return $default_value;
+        }
     }
 
     /**
@@ -239,10 +237,11 @@ class Controller
      * @param null $template_name
      * @return Response
      */
-    public function render($template_name = NULL, $template_args = array())
+    public function render($template_name = null, $template_args = [])
     {
-        if ($template_name === null)
-            $template_name = 'controller::'.$this->action;
+        if ($template_name === null) {
+            $template_name = 'controller::' . $this->action;
+        }
 
         $this->response = $this->response->withHeader('Content-type', 'text/html; charset=utf-8');
 
@@ -262,10 +261,11 @@ class Controller
      * @param null $form_title
      * @return Response
      */
-    protected function renderForm(\App\Form $form, $mode = 'edit', $form_title = NULL)
+    protected function renderForm(\App\Form $form, $mode = 'edit', $form_title = null)
     {
-        if ($form_title)
+        if ($form_title) {
             $this->view->title = $form_title;
+        }
 
         $this->view->form = $form;
         $this->view->render_mode = $mode;
@@ -309,8 +309,9 @@ class Controller
         $this->doNotRender();
         set_time_limit(600);
 
-        if ($file_name == null)
+        if ($file_name == null) {
             $file_name = basename($file_path);
+        }
 
         $this->response = $this->response
             ->withHeader('Pragma', 'public')
@@ -318,10 +319,11 @@ class Controller
             ->withHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->withHeader('Content-Type', mime_content_type($file_path))
             ->withHeader('Content-Length', filesize($file_path))
-            ->withHeader('Content-Disposition', 'attachment; filename='.$file_name);
+            ->withHeader('Content-Disposition', 'attachment; filename=' . $file_name);
 
         $fh = fopen($file_path, 'rb');
         $stream = new \Slim\Http\Stream($fh);
+
         return $this->response->withBody($stream);
     }
 
@@ -341,8 +343,9 @@ class Controller
             ->withHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->withHeader('Content-Type', $content_type);
 
-        if ($file_name !== null)
-            $this->response = $this->response->withHeader('Content-Disposition', 'attachment; filename='.$file_name);
+        if ($file_name !== null) {
+            $this->response = $this->response->withHeader('Content-Disposition', 'attachment; filename=' . $file_name);
+        }
 
         $body = $this->response->getBody();
         $body->write($file_data);
@@ -411,7 +414,7 @@ class Controller
     {
         return $this->redirect($this->di['url']->named('home'), $code);
     }
-    
+
     /**
      * Redirect with parameters to named route.
      *
@@ -419,7 +422,7 @@ class Controller
      * @param int $code
      * @return Response
      */
-    public function redirectToName($name, $route_params = array(), $code = 302)
+    public function redirectToName($name, $route_params = [], $code = 302)
     {
         return $this->redirect($this->di['url']->named($name, $route_params), $code);
     }
@@ -429,11 +432,11 @@ class Controller
      */
     protected function forceSecure()
     {
-        if (APP_APPLICATION_ENV == 'production' && !APP_IS_SECURE)
-        {
+        if (APP_APPLICATION_ENV == 'production' && !APP_IS_SECURE) {
             $this->doNotRender();
 
-            $url = 'https://'.$this->request->getHttpHost().$this->request->getUri();
+            $url = 'https://' . $this->request->getHttpHost() . $this->request->getUri();
+
             return $this->redirect($url, 301);
         }
     }
@@ -441,21 +444,23 @@ class Controller
     /* Referrer storage */
     protected function storeReferrer($namespace = 'default', $loose = true)
     {
-        $session = $this->di['session']->get('referrer_'.$namespace);
+        $session = $this->di['session']->get('referrer_' . $namespace);
 
-        if( !isset($session->url) || ($loose && isset($session->url) && $this->di['url']->current() != $this->di['url']->referrer()) )
+        if (!isset($session->url) || ($loose && isset($session->url) && $this->di['url']->current() != $this->di['url']->referrer())) {
             $session->url = $this->di['url']->referrer();
+        }
     }
 
     protected function getStoredReferrer($namespace = 'default')
     {
-        $session = $this->di['session']->get('referrer_'.$namespace);
+        $session = $this->di['session']->get('referrer_' . $namespace);
+
         return $session->url;
     }
 
     protected function clearStoredReferrer($namespace = 'default')
     {
-        $session = $this->di['session']->get('referrer_'.$namespace);
+        $session = $this->di['session']->get('referrer_' . $namespace);
         unset($session->url);
     }
 
@@ -466,19 +471,22 @@ class Controller
 
         $home_url = $this->di['url']->named('home');
 
-        if (strcmp($referrer, $this->request->getUri()->getPath()) == 0)
+        if (strcmp($referrer, $this->request->getUri()->getPath()) == 0) {
             $referrer = $home_url;
+        }
 
-        if( trim($referrer) == '' )
+        if (trim($referrer) == '') {
             $referrer = ($default_url) ? $default_url : $home_url;
+        }
 
         return $this->redirect($referrer);
     }
 
     protected function redirectToReferrer($default = false)
     {
-        if( !$default )
+        if (!$default) {
             $default = $this->di['url']->baseUrl();
+        }
 
         return $this->redirect($this->di['url']->referrer($default));
     }
@@ -492,6 +500,6 @@ class Controller
 
     public function alert($message, $level = \App\Flash::INFO)
     {
-        $this->di['flash']->addMessage($message, $level, TRUE);
+        $this->di['flash']->addMessage($message, $level, true);
     }
 }

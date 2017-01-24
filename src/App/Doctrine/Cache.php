@@ -25,10 +25,11 @@ class Cache extends \Doctrine\Common\Cache\CacheProvider
         $id = $this->_filterCacheId($id);
         $item = $this->_cache->getItem($id);
 
-        if (!$testCacheValidity || !$item->isMiss())
+        if (!$testCacheValidity || !$item->isMiss()) {
             return $item->get();
-        else
-            return FALSE;
+        } else {
+            return false;
+        }
     }
 
     protected function doContains($id)
@@ -38,15 +39,17 @@ class Cache extends \Doctrine\Common\Cache\CacheProvider
 
         return !$item->isMiss();
     }
-    
-    protected function doSave($id, $data, $lifeTime = NULL)
+
+    protected function doSave($id, $data, $lifeTime = null)
     {
-        if ($lifeTime == 0 || $lifeTime == NULL)
+        if ($lifeTime == 0 || $lifeTime == null) {
             $lifeTime = 3600;
+        }
 
         $id = $this->_filterCacheId($id);
 
         $item = $this->_cache->getItem($id);
+
         return $item->set($data, $lifeTime);
     }
 
@@ -55,19 +58,20 @@ class Cache extends \Doctrine\Common\Cache\CacheProvider
         $id = $this->_filterCacheId($id);
 
         $item = $this->_cache->getItem($id);
+
         return $item->clear();
     }
-    
+
     protected function doGetStats()
     {
         return null;
     }
-    
+
     protected function doFlush()
     {
         $this->_cache->flush();
     }
-    
+
     public function getIds()
     {
         return null;
@@ -93,7 +97,7 @@ class Cache extends \Doctrine\Common\Cache\CacheProvider
         }
         */
     }
-    
+
     protected function _filterCacheId($id)
     {
         return preg_replace("/[^a-zA-Z0-9_]/", "", $id);

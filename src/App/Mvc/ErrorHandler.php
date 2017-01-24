@@ -3,15 +3,14 @@ namespace App\Mvc;
 
 use Exception;
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ErrorHandler
 {
     public static function handle(ContainerInterface $di, Request $req, Response $res, Exception $e)
     {
-        if ($e instanceof \App\Exception\NotLoggedIn)
-        {
+        if ($e instanceof \App\Exception\NotLoggedIn) {
             // Redirect to login page for not-logged-in users.
             $flash = $di['flash'];
             $flash->addMessage('<b>Error:</b> You must be logged in to access this page!', 'red');
@@ -26,17 +25,15 @@ class ErrorHandler
             $login_url = $di['url']->named('account:login');
 
             return $res->withStatus(302)->withHeader('Location', $login_url);
-        }
-        elseif ($e instanceof \App\Exception\PermissionDenied)
-        {
+        } elseif ($e instanceof \App\Exception\PermissionDenied) {
             // Bounce back to homepage for permission-denied users.
-            $di['flash']->addMessage('You do not have permission to access this portion of the site.', \App\Flash::ERROR);
+            $di['flash']->addMessage('You do not have permission to access this portion of the site.',
+                \App\Flash::ERROR);
 
             $home_url = $di['url']->named('home');
+
             return $res->withStatus(302)->withHeader('Location', $home_url);
-        }
-        elseif (APP_IS_COMMAND_LINE)
-        {
+        } elseif (APP_IS_COMMAND_LINE) {
             $body = $res->getBody();
             $body->write(json_encode([
                 'code' => $e->getCode(),
@@ -46,22 +43,20 @@ class ErrorHandler
 
             return $res->withStatus(500)
                 ->withBody($body);
-        }
-        else
-        {
+        } else {
             $show_debug = false;
-            if ($di->has('acl'))
-            {
+            if ($di->has('acl')) {
                 $acl = $di->get('acl');
-                if ($acl->isAllowed('administer all'))
+                if ($acl->isAllowed('administer all')) {
                     $show_debug = true;
+                }
             }
 
-            if (APP_APPLICATION_ENV != 'production')
+            if (APP_APPLICATION_ENV != 'production') {
                 $show_debug = true;
+            }
 
-            if ($show_debug)
-            {
+            if ($show_debug) {
                 $view = $di->get('view');
                 $view->disable();
 
@@ -77,9 +72,7 @@ class ErrorHandler
 
                 return $res->withStatus(500)
                     ->withBody($body);
-            }
-            else
-            {
+            } else {
                 $view = $di->get('view');
                 $view->exception = $e;
 

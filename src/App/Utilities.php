@@ -14,18 +14,15 @@ class Utilities
      * @param bool $return
      * @return string
      */
-    public static function print_r($var, $return = FALSE)
+    public static function print_r($var, $return = false)
     {
         $return_value = '<pre style="font-size: 13px; font-family: Consolas, Courier New, Courier, monospace; color: #000; background: #EFEFEF; border: 1px solid #CCC; padding: 5px;">';
-        $return_value .= print_r($var, TRUE);
+        $return_value .= print_r($var, true);
         $return_value .= '</pre>';
-        
-        if ($return)
-        {
+
+        if ($return) {
             return $return_value;
-        }
-        else
-        {
+        } else {
             echo $return_value;
         }
     }
@@ -38,7 +35,7 @@ class Utilities
      */
     public static function money_format($number)
     {
-        return (($number < 0) ? '-' : '') .'$'.number_format(abs($number), 2);
+        return (($number < 0) ? '-' : '') . '$' . number_format(abs($number), 2);
     }
 
     /**
@@ -53,16 +50,15 @@ class Utilities
         $numeric_chars = str_split('234679');
         $uppercase_chars = str_split('ACDEFGHJKLMNPQRTWXYZ');
         $lowercase_chars = str_split('acdefghjkmnpqrtwxyz');
-        
-        $chars = array($numeric_chars, $uppercase_chars, $lowercase_chars);
-        
+
+        $chars = [$numeric_chars, $uppercase_chars, $lowercase_chars];
+
         $password = '';
-        for($i = 1; $i <= $char_length; $i++)
-        {
+        for ($i = 1; $i <= $char_length; $i++) {
             $char_array = $chars[$i % 3];
-            $password .= $char_array[mt_rand(0, count($char_array)-1)];
+            $password .= $char_array[mt_rand(0, count($char_array) - 1)];
         }
-        
+
         return str_shuffle($password);
     }
 
@@ -88,31 +84,33 @@ class Utilities
     public static function timeDifferenceText($timestamp1, $timestamp2, $precision = 1)
     {
         $time_diff = abs($timestamp1 - $timestamp2);
-        
-        if ($time_diff < 60)
-        {
+
+        if ($time_diff < 60) {
             $time_num = intval($time_diff);
+
             return sprintf(ngettext("%d second", "%d seconds", $time_num), $time_num);
-        }
-        else if ($time_diff >= 60 && $time_diff < 3600)
-        {
-            $time_num = round($time_diff / 60, $precision);
-            return sprintf(ngettext("%d minute", "%d minutes", $time_num), $time_num);
-        }
-        else if ($time_diff >= 3600 && $time_diff < 216000)
-        {
-            $time_num = round($time_diff / 3600, $precision);
-            return sprintf(ngettext("%d hour", "%d hours", $time_num), $time_num);
-        }
-        else if ($time_diff >= 216000 && $time_diff < 10368000)
-        {
-            $time_num = round($time_diff / 86400);
-            return sprintf(ngettext("%d day", "%d days", $time_num), $time_num);
-        }
-        else
-        {
-            $time_num = round($time_diff / 2592000);
-            return sprintf(ngettext("%d month", "%d months", $time_num), $time_num);
+        } else {
+            if ($time_diff >= 60 && $time_diff < 3600) {
+                $time_num = round($time_diff / 60, $precision);
+
+                return sprintf(ngettext("%d minute", "%d minutes", $time_num), $time_num);
+            } else {
+                if ($time_diff >= 3600 && $time_diff < 216000) {
+                    $time_num = round($time_diff / 3600, $precision);
+
+                    return sprintf(ngettext("%d hour", "%d hours", $time_num), $time_num);
+                } else {
+                    if ($time_diff >= 216000 && $time_diff < 10368000) {
+                        $time_num = round($time_diff / 86400);
+
+                        return sprintf(ngettext("%d day", "%d days", $time_num), $time_num);
+                    } else {
+                        $time_num = round($time_diff / 2592000);
+
+                        return sprintf(ngettext("%d month", "%d months", $time_num), $time_num);
+                    }
+                }
+            }
         }
     }
 
@@ -123,7 +121,7 @@ class Utilities
      * @param null $now
      * @return int
      */
-    public static function gstrtotime($time, $now = NULL)
+    public static function gstrtotime($time, $now = null)
     {
         $prev_timezone = @date_default_timezone_get();
         @date_default_timezone_set('UTC');
@@ -131,6 +129,7 @@ class Utilities
         $timestamp = strtotime($time, $now);
 
         @date_default_timezone_set($prev_timezone);
+
         return $timestamp;
     }
 
@@ -146,23 +145,19 @@ class Utilities
     {
         mb_internal_encoding('UTF-8');
 
-        if (mb_strlen($text) <= $limit)
-        {
+        if (mb_strlen($text) <= $limit) {
             return $text;
-        }
-        else
-        {
-            $wrapped_text = self::mb_wordwrap($text, $limit, "{N}", TRUE);
+        } else {
+            $wrapped_text = self::mb_wordwrap($text, $limit, "{N}", true);
             $shortened_text = mb_substr($wrapped_text, 0, strpos($wrapped_text, "{N}"));
-            
+
             // Prevent the padding string from bumping up against punctuation.
-            $punctuation = array('.',',',';','?','!');
-            if (in_array(mb_substr($shortened_text, -1), $punctuation))
-            {
+            $punctuation = ['.', ',', ';', '?', '!'];
+            if (in_array(mb_substr($shortened_text, -1), $punctuation)) {
                 $shortened_text = mb_substr($shortened_text, 0, -1);
             }
-            
-            return $shortened_text.$pad;
+
+            return $shortened_text . $pad;
         }
     }
 
@@ -180,21 +175,23 @@ class Utilities
         $lines = explode($break, $str);
         foreach ($lines as &$line) {
             $line = rtrim($line);
-            if (mb_strlen($line) <= $width)
+            if (mb_strlen($line) <= $width) {
                 continue;
+            }
             $words = explode(' ', $line);
             $line = '';
             $actual = '';
             foreach ($words as $word) {
-                if (mb_strlen($actual.$word) <= $width)
-                    $actual .= $word.' ';
-                else {
-                    if ($actual != '')
-                        $line .= rtrim($actual).$break;
+                if (mb_strlen($actual . $word) <= $width) {
+                    $actual .= $word . ' ';
+                } else {
+                    if ($actual != '') {
+                        $line .= rtrim($actual) . $break;
+                    }
                     $actual = $word;
                     if ($cut) {
                         while (mb_strlen($actual) > $width) {
-                            $line .= mb_substr($actual, 0, $width).$break;
+                            $line .= mb_substr($actual, 0, $width) . $break;
                             $actual = mb_substr($actual, $width);
                         }
                     }
@@ -203,6 +200,7 @@ class Utilities
             }
             $line .= trim($actual);
         }
+
         return implode($break, $lines);
     }
 
@@ -213,9 +211,10 @@ class Utilities
      * @param int $length
      * @return string
      */
-    public static function truncate_url($url, $length=40)
+    public static function truncate_url($url, $length = 40)
     {
-        $url = str_replace(array('http://', 'https://', 'www.'), array('', '', ''), $url);
+        $url = str_replace(['http://', 'https://', 'www.'], ['', '', ''], $url);
+
         return self::truncate_text(rtrim($url, '/'), $length);
     }
 
@@ -229,11 +228,13 @@ class Utilities
     {
         $count = count($items);
 
-        if ($count == 0)
+        if ($count == 0) {
             return '';
+        }
 
-        if ($count == 1)
+        if ($count == 1) {
             return $items[0];
+        }
 
         return implode(', ', array_slice($items, 0, -1)) . ' and ' . end($items);
     }
@@ -261,6 +262,7 @@ class Utilities
     {
         $items_total = (int)count($array);
         $items_per_col = ceil($items_total / $num_cols);
+
         return array_chunk($array, $items_per_col, $preserve_keys);
     }
 
@@ -305,12 +307,12 @@ class Utilities
     public static function array_merge_recursive_distinct(array &$array1, array &$array2)
     {
         $merged = $array1;
-        foreach ($array2 as $key => &$value)
-        {
-            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key]))
+        foreach ($array2 as $key => &$value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
                 $merged[$key] = self::array_merge_recursive_distinct($merged[$key], $value);
-            else
+            } else {
                 $merged[$key] = $value;
+            }
         }
 
         return $merged;
@@ -325,14 +327,14 @@ class Utilities
      */
     public static function array_keys_recursive($array)
     {
-        $keys = array();
+        $keys = [];
 
-        foreach((array)$array as $key => $value)
-        {
-            if (is_array($value))
+        foreach ((array)$array as $key => $value) {
+            if (is_array($value)) {
                 $keys = array_merge($keys, self::array_keys_recursive($value));
-            else
+            } else {
                 $keys[] = $key;
+            }
         }
 
         return $keys;
@@ -348,24 +350,25 @@ class Utilities
      * @param array $args
      * @return mixed
      */
-    public static function array_order_by($data, array $args = array())
+    public static function array_order_by($data, array $args = [])
     {
-        if (empty($args))
+        if (empty($args)) {
             return $data;
+        }
 
-        foreach ($args as $n => $field)
-        {
-            if (is_string($field))
-            {
-                $tmp = array();
-                foreach ($data as $key => $row)
+        foreach ($args as $n => $field) {
+            if (is_string($field)) {
+                $tmp = [];
+                foreach ($data as $key => $row) {
                     $tmp[$key] = $row[$field];
+                }
                 $args[$n] = $tmp;
             }
         }
 
         $args[] = &$data;
         call_user_func_array('array_multisort', $args);
+
         return array_pop($args);
     }
 
@@ -393,12 +396,12 @@ class Utilities
     public static function convert_url_query($query)
     {
         $queryParts = explode('&', $query);
-        $params = array();
-        foreach ($queryParts as $param)
-        {
+        $params = [];
+        foreach ($queryParts as $param) {
             $item = explode('=', $param);
             $params[$item[0]] = $item[1];
         }
+
         return $params;
     }
 
@@ -412,68 +415,79 @@ class Utilities
     {
         is_array($url) || $url = parse_url($url);
 
-        if (is_array($url['query']))
+        if (is_array($url['query'])) {
             $url['query'] = http_build_query($url['query']);
+        }
 
-        if (isset($url['path']) && substr($url['path'], 0, 1) !== '/')
+        if (isset($url['path']) && substr($url['path'], 0, 1) !== '/') {
             $url['path'] = '/' . $url['path'];
+        }
 
         $parsed_string = '';
-        if (isset($url['scheme']))
+        if (isset($url['scheme'])) {
             $parsed_string .= $url['scheme'] . '://';
+        }
 
-        if (isset($url['user']))
-        {
+        if (isset($url['user'])) {
             $parsed_string .= $url['user'];
 
-            if (isset($url['pass']))
+            if (isset($url['pass'])) {
                 $parsed_string .= ':' . $url['pass'];
+            }
 
             $parsed_string .= '@';
         }
 
-        if (isset($url['host']))
+        if (isset($url['host'])) {
             $parsed_string .= $url['host'];
+        }
 
-        if (isset($url['port']))
+        if (isset($url['port'])) {
             $parsed_string .= ':' . $url['port'];
+        }
 
-        if (!empty($url['path']))
+        if (!empty($url['path'])) {
             $parsed_string .= $url['path'];
-        else
+        } else {
             $parsed_string .= '/';
+        }
 
-        if (isset($url['query']))
+        if (isset($url['query'])) {
             $parsed_string .= '?' . $url['query'];
+        }
 
-        if (isset($url['fragment']))
+        if (isset($url['fragment'])) {
             $parsed_string .= '#' . $url['fragment'];
+        }
 
         return $parsed_string;
     }
-    
+
     /**
      * Construct a URL based on an array returned from parseUrl().
      *
      * @param $needle       The value we're looking for
      * @param $haystack     The array we're looking through
-     * @param $strict       If true, checks type as well   
+     * @param $strict       If true, checks type as well
      * @return string
      */
     public static function recursive_array_search($needle, $haystack, $strict = false)
     {
-        foreach($haystack as $key => $value) {
+        foreach ($haystack as $key => $value) {
             if (is_array($value)) {
                 // Value is an array, check that instead!
                 $nextKey = self::recursive_array_search($needle, $value, $strict);
-                
-                if ($nextKey)
+
+                if ($nextKey) {
                     return $nextKey;
+                }
+            } else {
+                if ($strict ? $value === $needle : $value == $needle) {
+                    return $key;
+                }
             }
-            else if($strict ? $value === $needle : $value == $needle)
-                return $key;
         }
-        
+
         return false;
     }
 
@@ -491,10 +505,10 @@ class Utilities
         $crawlers_agents = strtolower('Bloglines subscriber|Dumbot|Sosoimagespider|QihooBot|FAST-WebCrawler|Superdownloads Spiderman|LinkWalker|msnbot|ASPSeek|WebAlta Crawler|Lycos|FeedFetcher-Google|Yahoo|YoudaoBot|AdsBot-Google|Googlebot|Scooter|Gigabot|Charlotte|eStyle|AcioRobot|GeonaBot|msnbot-media|Baidu|CocoCrawler|Google|Charlotte t|Yahoo! Slurp China|Sogou web spider|YodaoBot|MSRBOT|AbachoBOT|Sogou head spider|AltaVista|IDBot|Sosospider|Yahoo! Slurp|Java VM|DotBot|LiteFinder|Yeti|Rambler|Scrubby|Baiduspider|accoona');
         $crawlers = explode("|", $crawlers_agents);
 
-        foreach($crawlers as $crawler)
-        {
-            if (strpos($ua, trim($crawler)) !== false)
+        foreach ($crawlers as $crawler) {
+            if (strpos($ua, trim($crawler)) !== false) {
                 return true;
+            }
         }
 
         return false;
@@ -506,28 +520,26 @@ class Utilities
      */
     public static function get_system_time_zone()
     {
-        if (file_exists('/etc/timezone'))
-        {
+        if (file_exists('/etc/timezone')) {
             // Ubuntu / Debian.
             $data = file_get_contents('/etc/timezone');
-            if ($data)
+            if ($data) {
                 return trim($data);
-        }
-        elseif (is_link('/etc/localtime'))
-        {
+            }
+        } elseif (is_link('/etc/localtime')) {
             // Mac OS X (and older Linuxes)
             // /etc/localtime is a symlink to the
             // timezone in /usr/share/zoneinfo.
             $filename = readlink('/etc/localtime');
-            if (strpos($filename, '/usr/share/zoneinfo/') === 0)
+            if (strpos($filename, '/usr/share/zoneinfo/') === 0) {
                 return substr($filename, 20);
-        }
-        elseif (file_exists('/etc/sysconfig/clock'))
-        {
+            }
+        } elseif (file_exists('/etc/sysconfig/clock')) {
             // RHEL / CentOS
             $data = parse_ini_file('/etc/sysconfig/clock');
-            if (!empty($data['ZONE']))
+            if (!empty($data['ZONE'])) {
                 return trim($data['ZONE']);
+            }
         }
 
         return 'UTC';
@@ -547,9 +559,9 @@ class Utilities
         $stderr = ob_get_clean();
 
         return [
-            'output'=> trim(implode("\n", $stdout)),
+            'output' => trim(implode("\n", $stdout)),
             'error' => (string)$stderr,
-            'code'  => $return_code,
+            'code' => $return_code,
         ];
     }
 
@@ -560,16 +572,14 @@ class Utilities
      */
     public static function rmdir_recursive($dir)
     {
-        if(is_dir($dir))
-        {
-            $files = array_diff(scandir($dir), array('.','..'));
-            foreach ($files as $file)
-                self::rmdir_recursive($dir.'/'.$file);
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            foreach ($files as $file) {
+                self::rmdir_recursive($dir . '/' . $file);
+            }
 
             @rmdir($dir);
-        }
-        else
-        {
+        } else {
             @unlink($dir);
         }
     }
@@ -582,10 +592,10 @@ class Utilities
      */
     public static function bytes_to_text($bytes)
     {
-        $si_prefix = array( 'B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB' );
+        $si_prefix = ['B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB'];
         $base = 1024;
-        $class = min((int)log($bytes , $base) , count($si_prefix) - 1);
+        $class = min((int)log($bytes, $base), count($si_prefix) - 1);
 
-        return sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class];
+        return sprintf('%1.2f', $bytes / pow($base, $class)) . ' ' . $si_prefix[$class];
     }
 }

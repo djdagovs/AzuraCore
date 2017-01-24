@@ -14,11 +14,11 @@
 
 namespace App\Doctrine\Paginate;
 
-use Doctrine\ORM\Query\TreeWalkerAdapter,
-    Doctrine\ORM\Query\AST\SelectStatement,
-    Doctrine\ORM\Query\AST\SelectExpression,
-    Doctrine\ORM\Query\AST\PathExpression,
-    Doctrine\ORM\Query\AST\AggregateExpression;
+use Doctrine\ORM\Query\AST\AggregateExpression;
+use Doctrine\ORM\Query\AST\PathExpression;
+use Doctrine\ORM\Query\AST\SelectExpression;
+use Doctrine\ORM\Query\AST\SelectStatement;
+use Doctrine\ORM\Query\TreeWalkerAdapter;
 
 class CountWalker extends TreeWalkerAdapter
 {
@@ -33,33 +33,30 @@ class CountWalker extends TreeWalkerAdapter
     {
         $parent = null;
         $parentName = null;
-        
-        foreach ($this->_getQueryComponents() AS $dqlAlias => $qComp)
-        {
+
+        foreach ($this->_getQueryComponents() AS $dqlAlias => $qComp) {
             // skip mixed data in query
-            if (isset($qComp['resultVariable']))
-            {
+            if (isset($qComp['resultVariable'])) {
                 continue;
             }
-            if ($qComp['parent'] === null && $qComp['nestingLevel'] == 0)
-            {
+            if ($qComp['parent'] === null && $qComp['nestingLevel'] == 0) {
                 $parent = $qComp;
                 $parentName = $dqlAlias;
                 break;
             }
         }
-        
+
         $pathExpression = new PathExpression(
-                        PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
-                        $parent['metadata']->getSingleIdentifierFieldName()
+            PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
+            $parent['metadata']->getSingleIdentifierFieldName()
         );
         $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
-        
-        $AST->selectClause->selectExpressions = array(
+
+        $AST->selectClause->selectExpressions = [
             new SelectExpression(
-                    new AggregateExpression('count', $pathExpression, true), null
+                new AggregateExpression('count', $pathExpression, true), null
             )
-        );
+        ];
 
         // ORDER BY is not needed, only increases query execution through unnecessary sorting.
         $AST->orderByClause = null;
