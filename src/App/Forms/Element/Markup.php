@@ -5,13 +5,12 @@ use Nibble\NibbleForms\Field;
 
 class Markup extends Field
 {
-    public $error = [];
+    public $error = array();
 
     protected $label;
-
     protected $markup;
 
-    public function __construct($label = 'CAPTCHA', $attributes = [])
+    public function __construct($label = 'CAPTCHA', $attributes = array())
     {
         $this->label = $label;
         $this->markup = $attributes['markup'];
@@ -19,12 +18,12 @@ class Markup extends Field
 
     public function returnField($form_name, $name, $value = '')
     {
-        return [
+        return array(
             'messages' => !empty($this->custom_error) && !empty($this->error) ? $this->custom_error : $this->error,
             'label' => $this->label == false ? false : sprintf('<label for="%s">%s</label>', $name, $this->label),
             'field' => $this->markup,
             'html' => $this->html
-        ];
+        );
     }
 
     public function validate($val)

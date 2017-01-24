@@ -5,13 +5,12 @@ use Nibble\NibbleForms\Field;
 
 class Captcha extends Field
 {
-    public $error = [];
+    public $error = array();
 
     protected $label;
-
     protected $attributes;
 
-    public function __construct($label = 'CAPTCHA', $attributes = [])
+    public function __construct($label = 'CAPTCHA', $attributes = array())
     {
         $this->label = $label;
         $this->attributes = $attributes;
@@ -26,24 +25,23 @@ FIELD;
 
         $class = !empty($this->error) ? ' class="error"' : '';
 
-        return [
+        return array(
             'messages' => !empty($this->custom_error) && !empty($this->error) ? $this->custom_error : $this->error,
-            'label' => $this->label == false ? false : sprintf('<label for="%s"%s>%s</label>', $name, $class,
-                $this->label),
+            'label' => $this->label == false ? false : sprintf('<label for="%s"%s>%s</label>', $name, $class, $this->label),
             'field' => sprintf($field, $this->attributes['public_key']),
             'html' => $this->html
-        ];
+        );
     }
 
     public function validate($val)
     {
-        $params = [
+        $params = array(
             'secret' => $this->attributes['private_key'],
             'response' => $val,
             'remoteip' => $_SERVER['REMOTE_ADDR']
-        ];
+        );
 
-        $url = 'https://www.google.com/recaptcha/api/siteverify?' . http_build_query($params);
+        $url = 'https://www.google.com/recaptcha/api/siteverify?' .http_build_query($params);
         $response = json_decode(file_get_contents($url));
         return $response->success;
     }

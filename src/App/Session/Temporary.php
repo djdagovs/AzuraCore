@@ -4,16 +4,25 @@ namespace App\Session;
 class Temporary implements \ArrayAccess
 {
     protected $_session;
-
     protected $_namespace;
-
     protected $_data;
 
     public function __construct(\App\Session $session, $namespace = 'default')
     {
         $this->_session = $session;
         $this->_namespace = $namespace;
-        $this->_data = [];
+        $this->_data = array();
+    }
+
+    /**
+     * Magic Method __set
+     *
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->_data[$name] = $value;
     }
 
     /**
@@ -35,22 +44,10 @@ class Temporary implements \ArrayAccess
      */
     public function __get($name)
     {
-        if (isset($this->_data[$name])) {
+        if (isset($this->_data[$name]))
             return $this->_data[$name];
-        }
 
         return null;
-    }
-
-    /**
-     * Magic Method __set
-     *
-     * @param $name
-     * @param $value
-     */
-    public function __set($name, $value)
-    {
-        $this->_data[$name] = $value;
     }
 
     /**
@@ -61,9 +58,8 @@ class Temporary implements \ArrayAccess
      */
     public function offsetGet($name)
     {
-        if (isset($this->_data[$name])) {
+        if (isset($this->_data[$name]))
             return $this->_data[$name];
-        }
 
         return null;
     }

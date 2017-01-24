@@ -1,8 +1,8 @@
 <?php
 namespace App\Mvc;
 
-use Interop\Container\ContainerInterface;
 use RuntimeException;
+use Interop\Container\ContainerInterface;
 use Slim\Interfaces\CallableResolverInterface;
 
 /**
@@ -28,15 +28,15 @@ class Resolver implements CallableResolverInterface
     {
         $resolved = $toResolve;
 
-        if (!is_callable($toResolve) && is_string($toResolve)) {
+        if (!is_callable($toResolve) && is_string($toResolve))
+        {
             list($module, $controller, $action) = explode(':', $toResolve);
 
-            $class = '\\Controller\\' . ucfirst($module) . '\\' . ucfirst($controller) . 'Controller';
-            if (!class_exists($class)) {
+            $class = '\\Controller\\'.ucfirst($module).'\\'.ucfirst($controller).'Controller';
+            if (!class_exists($class))
                 throw new RuntimeException(sprintf('Callable %s does not exist', $class));
-            }
 
-            $resolved = function ($request, $response, $args) use ($class, $module, $controller, $action) {
+            $resolved = function($request, $response, $args) use ($class, $module, $controller, $action) {
                 $controller = new $class($this->di, $module, $controller, $action);
                 return $controller->dispatch($request, $response, $args);
             };

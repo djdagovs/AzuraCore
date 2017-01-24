@@ -26,19 +26,19 @@ class File
     }
 
     /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
      * @param $file_name
      */
     public function setName($file_name)
     {
         $this->name = $file_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -50,13 +50,12 @@ class File
     public function addSuffix($suffix)
     {
         $file_parts = pathinfo($this->name);
-        $new_file_name = $file_parts['filename'] . $suffix . '.' . $file_parts['extension'];
+        $new_file_name = $file_parts['filename'].$suffix.'.'.$file_parts['extension'];
 
-        if ($file_parts['dirname'] != '.') {
-            $this->name = $file_parts['dirname'] . DIRECTORY_SEPARATOR . $new_file_name;
-        } else {
+        if ($file_parts['dirname'] != '.')
+            $this->name = $file_parts['dirname'].DIRECTORY_SEPARATOR.$new_file_name;
+        else
             $this->name = $new_file_name;
-        }
 
         return $this;
     }
@@ -69,63 +68,7 @@ class File
     public function getExtension()
     {
         // Significantly more performant than using pathinfo function.
-        return substr($this->name, strrpos($this->name, '.') + 1);
-    }
-
-    /**
-     * Attempt to move an uploaded file to the file name specified by the object.
-     *
-     * @param $uploaded_file
-     * @return bool
-     * @throws Exception
-     */
-    public function upload($uploaded_file)
-    {
-        if ($uploaded_file instanceof UploadedFileInterface) {
-            return $uploaded_file->moveTo($this->getPath());
-        }
-
-        if (!$this->isValid($uploaded_file)) {
-            switch ($uploaded_file['error']) {
-                case UPLOAD_ERR_INI_SIZE:
-                    throw new Exception('File Upload Error: The file you are attempting to upload is larger than allowed (upload_max_filesize).');
-                    break;
-
-                case UPLOAD_ERR_FORM_SIZE:
-                    throw new Exception('File Upload Error: The file you are attempting to upload is larger than allowed (MAX_FILE_SIZE).');
-                    break;
-
-                case UPLOAD_ERR_PARTIAL:
-                    throw new Exception('File Upload Error: The file you are attempting to upload was only partially uploaded.');
-                    break;
-
-                case UPLOAD_ERR_NO_FILE:
-                    throw new Exception('File Upload Error: No file was uploaded.');
-                    break;
-
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    throw new Exception('File Upload Error: Missing a temporary folder.');
-                    break;
-
-                case UPLOAD_ERR_CANT_WRITE:
-                    throw new Exception('File Upload Error: Failed to write file to disk.');
-                    break;
-
-                case UPLOAD_ERR_EXTENSION:
-                    throw new Exception('File Upload Error: Upload stopped by extension.');
-                    break;
-
-                default:
-                    throw new Exception('File Upload Error: No file was specified.');
-                    break;
-            }
-        }
-
-        if (move_uploaded_file($uploaded_file['tmp_name'], $this->getPath())) {
-            return true;
-        } else {
-            throw new Exception('File Upload Error: Could not upload the file requested.');
-        }
+        return substr($this->name, strrpos($this->name, '.')+1);
     }
 
     /**
@@ -139,7 +82,7 @@ class File
         $file_name = ltrim($file_name, '/');
         $file_name = str_replace('/', DIRECTORY_SEPARATOR, $file_name);
 
-        return $this->base_dir . DIRECTORY_SEPARATOR . $file_name;
+        return $this->base_dir.DIRECTORY_SEPARATOR.$file_name;
     }
 
     /**
@@ -151,6 +94,62 @@ class File
     public function isValid($uploaded_file)
     {
         return (!empty($uploaded_file) && $uploaded_file['error'] == UPLOAD_ERR_OK);
+    }
+
+    /**
+     * Attempt to move an uploaded file to the file name specified by the object.
+     *
+     * @param $uploaded_file
+     * @return bool
+     * @throws Exception
+     */
+    public function upload($uploaded_file)
+    {
+        if ($uploaded_file instanceof UploadedFileInterface)
+            return $uploaded_file->moveTo($this->getPath());
+
+        if (!$this->isValid($uploaded_file))
+        {
+            switch($uploaded_file['error'])
+            {
+                case UPLOAD_ERR_INI_SIZE:
+                    throw new Exception('File Upload Error: The file you are attempting to upload is larger than allowed (upload_max_filesize).');
+                break;
+                
+                case UPLOAD_ERR_FORM_SIZE:
+                    throw new Exception('File Upload Error: The file you are attempting to upload is larger than allowed (MAX_FILE_SIZE).');
+                break;
+                    
+                case UPLOAD_ERR_PARTIAL:
+                    throw new Exception('File Upload Error: The file you are attempting to upload was only partially uploaded.');
+                break;
+                
+                case UPLOAD_ERR_NO_FILE:
+                    throw new Exception('File Upload Error: No file was uploaded.');
+                break;
+                
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    throw new Exception('File Upload Error: Missing a temporary folder.');
+                break;
+                
+                case UPLOAD_ERR_CANT_WRITE:
+                    throw new Exception('File Upload Error: Failed to write file to disk.');
+                break;
+                
+                case UPLOAD_ERR_EXTENSION:
+                    throw new Exception('File Upload Error: Upload stopped by extension.');
+                break;
+                    
+                default:
+                    throw new Exception('File Upload Error: No file was specified.');
+                break;
+            }
+        }
+
+        if (move_uploaded_file($uploaded_file['tmp_name'], $this->getPath()))
+            return true;
+        else
+            throw new Exception('File Upload Error: Could not upload the file requested.');
     }
 
     /**
@@ -179,44 +178,14 @@ class File
     }
 
     /**
-     * Returns a "clean" array with the first row's text as the column names.
+     * Get a fopen resource pointer to the file.
      *
-     * @return array
+     * @param string $mode
+     * @return resource
      */
-    public function getCleanCsv()
+    public function getPointer($mode = 'r')
     {
-        $csv_data = $this->getCsv();
-        $clean_data = [];
-
-        if ($csv_data) {
-            $headers = [];
-            $row_num = 0;
-            $col_num = 0;
-
-            $header_row = array_shift($csv_data);
-            foreach ($header_row as $csv_col) {
-                $field_name = strtolower(preg_replace("/[^a-zA-Z0-9_]/", "", $csv_col));
-                if (!empty($field_name)) {
-                    $headers[$col_num] = $field_name;
-                }
-                $col_num++;
-            }
-
-            foreach ($csv_data as $csv_row) {
-                $col_num = 0;
-                $clean_row = [];
-                foreach ($csv_row as $csv_col) {
-                    $col_name = (isset($headers[$col_num])) ? $headers[$col_num] : $col_num;
-                    $clean_row[$col_name] = $csv_col;
-                    $col_num++;
-                }
-
-                $clean_data[] = $clean_row;
-                $row_num++;
-            }
-        }
-
-        return $clean_data;
+        return fopen($this->getPath(), $mode);
     }
 
     /**
@@ -227,26 +196,60 @@ class File
     public function getCsv()
     {
         @ini_set('auto_detect_line_endings', 1);
-
-        $csv_data = [];
+        
+        $csv_data = array();
         $handle = $this->getPointer();
-        while (($data = fgetcsv($handle)) !== false) {
+        while (($data = fgetcsv($handle)) !== FALSE)
+        {
             $csv_data[] = $data;
         }
-
+        
         fclose($handle);
         return $csv_data;
     }
 
     /**
-     * Get a fopen resource pointer to the file.
+     * Returns a "clean" array with the first row's text as the column names.
      *
-     * @param string $mode
-     * @return resource
+     * @return array
      */
-    public function getPointer($mode = 'r')
+    public function getCleanCsv()
     {
-        return fopen($this->getPath(), $mode);
+        $csv_data = $this->getCsv();
+        $clean_data = array();
+        
+        if ($csv_data)
+        {
+            $headers = array();
+            $row_num = 0;
+            $col_num = 0;
+            
+            $header_row = array_shift($csv_data);
+            foreach($header_row as $csv_col)
+            {
+                $field_name = strtolower(preg_replace("/[^a-zA-Z0-9_]/", "", $csv_col));
+                if (!empty($field_name))
+                    $headers[$col_num] = $field_name;
+                $col_num++;
+            }
+            
+            foreach($csv_data as $csv_row)
+            {
+                $col_num = 0;
+                $clean_row = array();
+                foreach($csv_row as $csv_col)
+                {
+                    $col_name = (isset($headers[$col_num])) ? $headers[$col_num] : $col_num;
+                    $clean_row[$col_name] = $csv_col;
+                    $col_num++;
+                }
+                
+                $clean_data[] = $clean_row;
+                $row_num++;
+            }
+        }
+
+        return $clean_data;
     }
 
     /**
@@ -262,9 +265,8 @@ class File
         $this->setName($new_name);
         $new_path = $this->getPath();
 
-        if (file_exists($old_path)) {
+        if (file_exists($old_path))
             rename($old_path, $new_path);
-        }
 
         return $this;
     }

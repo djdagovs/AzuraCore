@@ -6,16 +6,18 @@
 
 namespace App\Tests;
 
-use Codeception\Configuration;
-use Codeception\Lib\Framework;
-use Codeception\Lib\Interfaces\DoctrineProvider;
-use Codeception\TestInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Interop\Container\ContainerInterface;
+use Codeception\Configuration;
+use Codeception\TestInterface;
+use Codeception\Lib\Framework;
+use Codeception\Lib\Interfaces\DoctrineProvider;
 use Slim\App;
 
 class Module extends Framework implements DoctrineProvider
 {
+    protected $requiredFields = ['container'];
+
     /**
      * @var ContainerInterface
      */
@@ -31,13 +33,10 @@ class Module extends Framework implements DoctrineProvider
      */
     public $em;
 
-    protected $requiredFields = ['container'];
-
     public function _initialize()
     {
-        if (!defined('APP_TESTING_MODE')) {
+        if (!defined('APP_TESTING_MODE'))
             define('APP_TESTING_MODE', true);
-        }
 
         $cwd = getcwd();
         chdir(Configuration::projectDir());

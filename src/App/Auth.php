@@ -1,8 +1,8 @@
 <?php
 namespace App;
 
-use Entity\Repository\UserRepository;
 use Entity\User;
+use Entity\Repository\UserRepository;
 
 class Auth
 {
@@ -22,7 +22,7 @@ class Auth
     {
         $this->_user_repo = $user_repo;
 
-        $class_name = strtolower(str_replace(['\\', '_'], ['', ''], get_called_class()));
+        $class_name = strtolower(str_replace(array('\\', '_'), array('', ''), get_called_class()));
         $this->_session = $session->get('auth_' . $class_name . '_user');
     }
 
@@ -37,64 +37,31 @@ class Auth
     {
         $user_auth = $this->_user_repo->authenticate($username, $password);
 
-        if ($user_auth instanceof User) {
+        if ($user_auth instanceof User)
+        {
             $this->setUser($user_auth);
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
 
     /**
-     * Get the currently logged in user.
+     * Log out of the currently active session.
      *
-     * @param bool $real_user_only
-     * @return bool|User|null|object
+     * @param null $destination
+     * @param bool $unset_session
      */
-    public function getLoggedInUser($real_user_only = false)
+    public function logout()
     {
-        if ($this->isMasqueraded() && !$real_user_only) {
-            return $this->getMasquerade();
-        } else {
-            return $this->getUser();
-        }
-    }
+        unset($this->_session->user_id);
+        unset($this->_session->masquerade_user_id);
 
-    /**
-     * Check if the current user is masquerading as another account.
-     *
-     * @return bool
-     */
-    public function isMasqueraded()
-    {
-        if (!$this->isLoggedIn()) {
-            $this->_masqueraded_user = false;
-            return false;
-        }
+        $this->_user = null;
 
-        if ($this->_masqueraded_user === null) {
-            if (!$this->_session->masquerade_user_id) {
-                $this->_masqueraded_user = false;
-            } else {
-                $mask_user_id = (int)$this->_session->masquerade_user_id;
-                if ($mask_user_id != 0) {
-                    $user = $this->_user_repo->find($mask_user_id);
-                } else {
-                    $user = null;
-                }
-
-                if ($user instanceof User) {
-                    $this->_masqueraded_user = $user;
-                } else {
-                    unset($this->_session->user_id);
-                    unset($this->_session->masquerade_user_id);
-
-                    $this->_masqueraded_user = false;
-                }
-            }
-        }
-
-        return ($this->_masqueraded_user instanceof User);
+        @session_unset();
     }
 
     /**
@@ -104,12 +71,25 @@ class Auth
      */
     public function isLoggedIn()
     {
-        if (APP_IS_COMMAND_LINE && !APP_TESTING_MODE) {
+        if (APP_IS_COMMAND_LINE && !APP_TESTING_MODE)
             return false;
-        }
 
         $user = $this->getUser();
         return ($user instanceof User);
+    }
+
+    /**
+     * Get the currently logged in user.
+     *
+     * @param bool $real_user_only
+     * @return bool|User|null|object
+     */
+    public function getLoggedInUser($real_user_only = FALSE)
+    {
+        if ($this->isMasqueraded() && !$real_user_only)
+            return $this->getMasquerade();
+        else
+            return $this->getUser();
     }
 
     /**
@@ -120,20 +100,25 @@ class Auth
      */
     public function getUser()
     {
-        if ($this->_user === null) {
+        if ($this->_user === NULL)
+        {
             $user_id = (int)$this->_session->user_id;
 
-            if ($user_id == 0) {
-                $this->_user = false;
+            if ($user_id == 0)
+            {
+                $this->_user = FALSE;
                 return false;
             }
 
             $user = $this->_user_repo->find($user_id);
-            if ($user instanceof User) {
+            if ($user instanceof User)
+            {
                 $this->_user = $user;
-            } else {
+            }
+            else
+            {
                 unset($this->_session->user_id);
-                $this->_user = false;
+                $this->_user = FALSE;
                 $this->logout();
 
                 throw new Exception('Invalid user!');
@@ -165,19 +150,26 @@ class Auth
      */
 
     /**
-     * Log out of the currently active session.
+     * Become a different user across the application.
      *
-     * @param null $destination
-     * @param bool $unset_session
+     * @param $user_info
      */
-    public function logout()
+    public function masqueradeAsUser($user_info)
     {
-        unset($this->_session->user_id);
+        if (!($user_info instanceof User))
+            $user_info = $this->_user_repo->findOneBy($user_info);
+
+        $this->_session->masquerade_user_id = $user_info->id;
+        $this->_masqueraded_user = $user_info;
+    }
+
+    /**
+     * Return to the regular authenticated account.
+     */
+    public function endMasquerade()
+    {
         unset($this->_session->masquerade_user_id);
-
-        $this->_user = null;
-
-        @session_unset();
+        $this->_masqueraded_user = null;
     }
 
     /**
@@ -191,26 +183,46 @@ class Auth
     }
 
     /**
-     * Become a different user across the application.
+     * Check if the current user is masquerading as another account.
      *
-     * @param $user_info
+     * @return bool
      */
-    public function masqueradeAsUser($user_info)
+    public function isMasqueraded()
     {
-        if (!($user_info instanceof User)) {
-            $user_info = $this->_user_repo->findOneBy($user_info);
+        if (!$this->isLoggedIn())
+        {
+            $this->_masqueraded_user = FALSE;
+            return false;
         }
 
-        $this->_session->masquerade_user_id = $user_info->id;
-        $this->_masqueraded_user = $user_info;
-    }
+        if ($this->_masqueraded_user === NULL)
+        {
+            if (!$this->_session->masquerade_user_id)
+            {
+                $this->_masqueraded_user = FALSE;
+            }
+            else
+            {
+                $mask_user_id = (int)$this->_session->masquerade_user_id;
+                if ($mask_user_id != 0)
+                    $user = $this->_user_repo->find($mask_user_id);
+                else
+                    $user = NULL;
 
-    /**
-     * Return to the regular authenticated account.
-     */
-    public function endMasquerade()
-    {
-        unset($this->_session->masquerade_user_id);
-        $this->_masqueraded_user = null;
+                if ($user instanceof User)
+                {
+                    $this->_masqueraded_user = $user;
+                }
+                else
+                {
+                    unset($this->_session->user_id);
+                    unset($this->_session->masquerade_user_id);
+
+                    $this->_masqueraded_user = FALSE;
+                }
+            }
+        }
+
+        return ($this->_masqueraded_user instanceof User);
     }
 }

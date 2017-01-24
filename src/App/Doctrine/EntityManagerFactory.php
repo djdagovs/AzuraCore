@@ -8,18 +8,15 @@ class EntityManagerFactory
 {
     public static function create(ContainerInterface $di, $options)
     {
-        if (empty($options)) {
+        if(empty($options))
             return false;
-        }
 
         // Register custom data types.
-        if (!Type::hasType('json')) {
+        if (!Type::hasType('json'))
             Type::addType('json', 'App\Doctrine\Type\Json');
-        }
 
-        if (!Type::hasType('unixdatetime')) {
+        if (!Type::hasType('unixdatetime'))
             Type::addType('unixdatetime', 'App\Doctrine\Type\UnixDateTime');
-        }
 
         Type::overrideType('array', 'App\Doctrine\Type\SoftArray');
         Type::overrideType('datetime', 'App\Doctrine\Type\UTCDateTime');
@@ -28,13 +25,15 @@ class EntityManagerFactory
         $config = new \Doctrine\ORM\Configuration;
 
         // Handling for class names specified as platform types.
-        if (!empty($options['conn']['platform'])) {
+        if (!empty($options['conn']['platform']))
+        {
             $class_obj = new \ReflectionClass($options['conn']['platform']);
             $options['conn']['platform'] = $class_obj->newInstance();
         }
 
         // Special handling for the utf8mb4 type.
-        if ($options['conn']['driver'] == 'pdo_mysql' && $options['conn']['charset'] == 'utf8mb4') {
+        if ($options['conn']['driver'] == 'pdo_mysql' && $options['conn']['charset'] == 'utf8mb4')
+        {
             $options['conn']['platform'] = new \App\Doctrine\Platform\MysqlUnicode;
         }
 
@@ -52,9 +51,8 @@ class EntityManagerFactory
 
         $config->setDefaultRepositoryClassName('\App\Doctrine\Repository');
 
-        if (isset($options['conn']['debug']) && $options['conn']['debug']) {
+        if (isset($options['conn']['debug']) && $options['conn']['debug'])
             $config->setSQLLogger(new \App\Doctrine\Logger\EchoSQL);
-        }
 
         $config->addFilter('softdelete', '\App\Doctrine\Filter\SoftDelete');
         $config->addCustomNumericFunction('RAND', '\App\Doctrine\Functions\Rand');

@@ -4,10 +4,26 @@ namespace App;
 class Session
 {
     protected $_prevent_sessions = false;
-
     protected $_is_started = false;
+    protected $_sessions = array();
 
-    protected $_sessions = [];
+    /**
+     * Start the session handler if allowed and not already started.
+     *
+     * @return bool
+     */
+    public function start()
+    {
+        if ($this->_is_started)
+            return true;
+
+        if (!$this->isActive())
+            return false;
+
+        $this->_is_started = @session_start();
+
+        return $this->_is_started;
+    }
 
     /**
      * Alias for self::getNamespace()
@@ -30,14 +46,14 @@ class Session
     {
         $session_name = self::getNamespaceName($namespace);
 
-        if (!isset($this->_sessions[$session_name])) {
-            if (self::isActive()) {
+        if (!isset($this->_sessions[$session_name]))
+        {
+            if (self::isActive())
                 $this->_sessions[$session_name] = new \App\Session\Instance($this, $session_name);
-            } else {
+            else
                 $this->_sessions[$session_name] = new \App\Session\Temporary($this, $session_name);
-            }
         }
-
+        
         return $this->_sessions[$session_name];
     }
 
@@ -50,25 +66,7 @@ class Session
     public function getNamespaceName($suffix = 'default')
     {
         $app_hash = strtoupper(substr(md5(APP_INCLUDE_BASE), 0, 5));
-        return 'APP_' . $app_hash . '_' . $suffix;
-    }
-
-    /**
-     * Indicates if sessions are currently active (and permitted).
-     *
-     * @return bool
-     */
-    public function isActive()
-    {
-        if (APP_IS_COMMAND_LINE && !APP_TESTING_MODE) {
-            return false;
-        }
-
-        if ($this->_prevent_sessions) {
-            return false;
-        }
-
-        return true;
+        return 'APP_'.$app_hash.'_'.$suffix;
     }
 
     /**
@@ -114,6 +112,22 @@ class Session
     }
 
     /**
+     * Indicates if sessions are currently active (and permitted).
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        if (APP_IS_COMMAND_LINE && !APP_TESTING_MODE)
+            return false;
+
+        if ($this->_prevent_sessions)
+            return false;
+
+        return true;
+    }
+
+    /**
      * Destroy a session.
      */
 
@@ -122,10 +136,11 @@ class Session
         $this->start();
 
         // Unset all of the session variables.
-        $_SESSION = [];
+        $_SESSION = array();
 
         // Destroy session cookie.
-        if (ini_get("session.use_cookies")) {
+        if (ini_get("session.use_cookies"))
+        {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000,
                 $params["path"], $params["domain"],
@@ -138,36 +153,15 @@ class Session
     }
 
     /**
-     * Start the session handler if allowed and not already started.
-     *
-     * @return bool
-     */
-    public function start()
-    {
-        if ($this->_is_started) {
-            return true;
-        }
-
-        if (!$this->isActive()) {
-            return false;
-        }
-
-        $this->_is_started = @session_start();
-
-        return $this->_is_started;
-    }
-
-    /**
      * Indicates if a session has already been started in this page load.
      *
      * @return bool
      */
     public function isStarted()
     {
-        if (defined('PHP_SESSION_ACTIVE')) {
+        if (defined('PHP_SESSION_ACTIVE'))
             return (session_status() !== PHP_SESSION_ACTIVE);
-        } else {
+        else
             return (!session_id());
-        }
     }
 }

@@ -1,8 +1,8 @@
 <?php
 namespace App\Doctrine\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ArrayType;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * My custom datatype.
@@ -18,12 +18,11 @@ class Json extends ArrayType
 
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        if ($value === null) {
+        if ($value === null)
             return null;
-        }
-
+        
         $value = (is_resource($value)) ? stream_get_contents($value, -1) : $value;
-
+        
         return json_decode((string)$value, 1);
     }
 

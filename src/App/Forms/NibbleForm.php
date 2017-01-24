@@ -13,42 +13,40 @@ class NibbleForm extends \Nibble\NibbleForms\NibbleForm
         $format = 'list',
         $multiple_errors = false
     ) {
-        return parent::__construct($action, $submit_value, $html5, $method, $sticky, $message_type, $format,
-            $multiple_errors);
+        return parent::__construct($action, $submit_value, $html5, $method, $sticky, $message_type, $format, $multiple_errors);
     }
 
     /**
      * @inheritdoc
      */
-    public function addField($field_name, $type = 'text', array $attributes = [], $overwrite = false)
+    public function addField($field_name, $type = 'text', array $attributes = array(), $overwrite = false)
     {
         $namespace_options = [
             "\\App\\Forms\\Element\\" . ucfirst($type),
             "\\Nibble\\NibbleForms\\Field\\" . ucfirst($type),
         ];
 
-        foreach ($namespace_options as $namespace_option) {
-            if (class_exists($namespace_option)) {
+        foreach($namespace_options as $namespace_option)
+        {
+            if (class_exists($namespace_option))
+            {
                 $namespace = $namespace_option;
                 break;
             }
         }
 
-        if (!isset($namespace)) {
+        if (!isset($namespace))
             return false;
-        }
 
-        if (isset($attributes['label'])) {
+        if (isset($attributes['label']))
             $label = $attributes['label'];
-        } else {
+        else
             $label = ucfirst(str_replace('_', ' ', $field_name));
-        }
 
         $field_name = \Nibble\NibbleForms\Useful::slugify($field_name, '_');
 
-        if (isset($this->fields->$field_name) && !$overwrite) {
+        if (isset($this->fields->$field_name) && !$overwrite)
             return false;
-        }
 
         $this->fields->$field_name = new $namespace($label, $attributes);
         $this->fields->$field_name->setForm($this);
@@ -64,9 +62,8 @@ class NibbleForm extends \Nibble\NibbleForms\NibbleForm
     public function validate()
     {
         $request = strtoupper($this->method) == 'POST' ? $_POST : $_GET;
-        if (isset($request[$this->name])) {
+        if (isset($request[$this->name]))
             $this->data = $request[$this->name];
-        }
 
         return parent::validate();
     }

@@ -1,9 +1,9 @@
 <?php
 namespace App\Doctrine\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\DateTimeType;
+use \Doctrine\DBAL\Types\DateTimeType;
+use \Doctrine\DBAL\Platforms\AbstractPlatform;
+use \Doctrine\DBAL\Types\ConversionException;
 
 class UTCDateTime extends DateTimeType
 {

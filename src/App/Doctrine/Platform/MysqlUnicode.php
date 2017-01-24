@@ -7,15 +7,13 @@ namespace App\Doctrine\Platform;
 
 class MysqlUnicode extends \Doctrine\DBAL\Platforms\MySqlPlatform
 {
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
     {
-        if (!isset($options['charset'])) {
+        if (!isset($options['charset']))
             $options['charset'] = 'utf8mb4';
-        }
 
-        if (!isset($options['collate'])) {
+        if (!isset($options['collate']))
             $options['collate'] = 'utf8mb4_unicode_ci';
-        }
 
         return parent::_getCreateTableSQL($tableName, $columns, $options);
     }
